@@ -447,18 +447,19 @@ We also document the total learning time for K iterations for the algorithms und
 
 	A first look at the results reveals that our methods in blue and red dominate a large portion of the pareto front, demonstrating good performance and generalisation in reasonable time. Furthermore, comparing the green and blue points we can see that RLT$^*$ can learn faster without sacrificing any of the performance. In fact looking at the standard error across validation sets we can see that this is consistently less as far as RLT$^*$ is concerned. This suggests the caching scheme introduces extra robustness and generalisation capabilities within the algorithm. Finally we notice that the MMP learning time scales exponentially with the size of the grid. This however is not solely to the fact that the graph gets larger but also because A$^*$ search does not scale well with the complexity of the cost function itself. This is due to its reliance on an admicible heuristic that for complex cost functions is no longer tight, forcing the search to expand many more states. By contrast, the sample-based nature of RLT$^*$ makes it less susceptible to these pathologies.  \ks{Qualitative results in simulation?}
 
-		\begin{figure}[tbh]
-%	\hspace{-5cm}
+	\begin{figure}[tbh]
 	\centering
-      \begin{subfigure}[b]{0.42\columnwidth}
-    \includegraphics[scale=0.25]{images/pf.png}
+	\captionsetup[subfigure]{justification=centering}
+	\hspace{-1cm}
+      \begin{subfigure}[b]{0.41\columnwidth}
+    \includegraphics[scale=0.25]{images/pf_same.png}
     \caption{Scenario 1: Same features, different weights.}
     \label{fig:res_sim1}
   \end{subfigure}
-  \hspace{10mm}
-  \begin{subfigure}[b]{0.42\columnwidth}
-  \hspace{4mm}
-    \includegraphics[scale=0.25]{images/pf_val.png}
+     	\hspace{10mm}
+  \begin{subfigure}[b]{0.41\columnwidth}
+
+    \includegraphics[scale=0.25]{images/pf_different.png}
     \caption{Scenario 2: Different features and weights.}
     \label{fig:res_sim2}
   \end{subfigure} 
@@ -519,7 +520,7 @@ We also document the total learning time for K iterations for the algorithms und
     \caption{}
     \label{fig:res_real4}
   \end{subfigure} 
-    \caption{Comparing real demonstrated paths (black), learned paths (red), and shortest path (purple). (a) + (b): Instances where the learned path is very similar to the deonstrated path. (c) + (d): Instances where the learned path is not the same as the demonstrated path, but reasonable. }
+    \caption{Comparing real demonstrated paths (black), learned paths (red), and shortest path (purple). (a) + (b): Instances where the learned path is very similar to the deonstrated path. (c) + (d): Instances where the learned path is not the same as the demonstrated path, but reasonable.}
     \vspace{-2mm}
   %\vspace{-3mm}
   \label{fig:results_real}
