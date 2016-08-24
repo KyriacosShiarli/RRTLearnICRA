@@ -73,33 +73,50 @@ In this paper, we propose Rapidly Exploring Learning Trees (RLT$^*$), which lear
 
 Learning from demonstration (LfD) \cite{argall2009survey} is of great interest to roboticists because it can avoid the need for tedious manual programming of complex behaviours. While most LfD methods rely on supervised learning to directly learn policies, certain approaches, namely inverse optimal control (IOC) \cite{kalman1964linear} and inverse reinforcement learning (IRL) \cite{abbeel2004apprenticeship} instead learn \emph{cost functions} from demonstration. These cost functions are then used to \emph{plan} the robot's behaviour. 
 
-Because cost functions abstract the planning procedure, they tend to be more general and robust to changes in the environment. A robot trained using direct policy estimation (or behavioural cloning), has less chance of adapting than one that has been trained using IRL or IOC because the cost function remains unchanged. In addition, cost functions are thought to be more succinct representations of the aims of the agent \cite{abbeel2004apprenticeship}. For example, an agent whose aim is to get as fast as possible to a goal location will have a simple cost function but a rather complex and uninterpretable policy. 
+Because cost functions abstract the planning procedure, they tend to be more general and robust to changes in the environment. Suppose the friction in the wheels of a robot changes due to wear and tear, this change should not affect the \emph{cost function}. Despite this, a robot trained using direct policy estimation (or behavioural cloning), will need to have its training is either repeated or refined. A robot trained using IRL or IOC will simply need to take into account the changin dynamics in its planner, leaving the cost function unchanged. In addition, cost functions are thought to be more succinct representations of the aims of the agent \cite{abbeel2004apprenticeship}. For example, an agent whose aim is to get as fast as possible to a goal location will have a simple cost function but a rather complex and uninterpretable policy. 
 
-However, inverse methods also have practical limitations. IRL for example requires modeling the task as a Markov decision process (MDP), which is typically impractical in robotics, for several reasons.  Firstly, an MDP assumes full observability. Secondly, planning in an MDP, which IRL methods must do repeatedly, is costly, especially in continuous and high-dimensional domains. Finally, the lack of scalability and the assumption of full observability prohibit the accurate modeling of all aspect of the environment that a robot is expected to operate in. 
+In its most basic form IRL is an iterative process that in an inner loop solves the forward planning problem, i.e., finds an optimal policy under the current cost function and subsequently updates the current cost function appropriately. The procedure repeats until convergence. For continuous domains such as robotics, solving the planning problem exactly very quickly becomes intractable. If discretisation is chosen as a solution, then the curse of dimentionality places a limit on the fidelity with which the underlying state-action space can be modelled. 
 
-For these reasons, several researchers have proposed replacing the planning step in IRL with more convienient planners, e.g., Maximum Margin Planning (MMP)~\cite{ratliff2006maximum} uses A$^*$ search for planning. This avoids the need to do all the planning in advance, as is typical when solving an MDP. It also avoids the need to model all aspects of the environment since the robot can quickly replan its trajectory to account for uncertainty. However, deterministic search methods such as A$^*$ require discretisation of the state space, and quickly run into scalability problems as the discretisation becomes finer. 
+%  IRL for example requires modeling the task as a Markov decision process (MDP), which is typically impractical in robotics, for several reasons.  Firstly, an MDP assumes full observability. Secondly, planning in an MDP, which IRL methods must do repeatedly, is costly, especially in continuous and high-dimensional domains. Finally, the lack of scalability and the assumption of full observability prohibit the accurate modeling of all aspect of the environment that a robot is expected to operate in. 
 
-In path planning, Rapidly Exploring Random Trees (RRTs)~\cite{lavalle1998rapidly} are popular because they cope well with continuous and high-dimensional domains. The RRT$^*$ algorithm \cite{karaman2011sampling}, which extends RRTs to incorporate a cost function, is especially effective. However, the cost functions used by RRT$^*$ are typically simple and hand-coded and, to our knowledge, no methods have been developed to learn RRT$^*$ cost functions from demonstrations.
+% For these reasons, several researchers have proposed replacing the planning step in IRL with more convienient planners, e.g., Maximum Margin Planning (MMP)~\cite{ratliff2006maximum} uses A$^*$ search for planning. This avoids the need to do all the planning in advance, as is typical when solving an MDP. It also avoids the need to model all aspects of the environment since the robot can quickly replan its trajectory to account for uncertainty. However, deterministic search methods such as A$^*$ require discretisation of the state space, and quickly run into scalability problems as the discretisation becomes finer. 
+
+In this paper we show that fast, single query motion planners, namely Rapidly Exploring Random Trees(RRTs) \cite{lavalle1998rapidly} can be used to perform the inner loop of the IRL procedure. We begin by proposing an approximate formulation of Maximum Margin Planning (MMP) as presented in \cite{ratliff2006maximum}. We then show that the resulting approximation can be executed by the asymptotically optimal version of RRT, namely RRT$^*$ \cite{karaman2011sampling}. Finally, we propose a caching scheme that greatly reduces the computational cost and increases the performance of this approach. This results in an algorithm we call the Rapidly Exploring Learning Tree RLT$^*$, which allows learning in high dimentional, continuous state-action spaces with obstacles and kinodynamic constraints. 
+
+We evaluate RLT$^*$ on real and simulated data from a social navigation scenario. The results demonstrate that in the absense of kinodynamic constraints RLT$^*$ achieves better performance at lower computational cost than both MMP and a more naive version of RLT$^*$ that does not use caching. Furthermore we show that RLT$^*$ can learn cost functions in robotic tasks with kinodynamic constraints. Finally we deploy our method on a real robot using data from human demonstrations.
+
+% In path planning, Rapidly Exploring Random Trees (RRTs)~\cite{lavalle1998rapidly} are popular because they cope well with continuous and high-dimensional domains. The RRT$^*$ algorithm , which extends RRTs to incorporate a cost function, is especially effective. However, the cost functions used by RRT$^*$ are typically simple and hand-coded and, to our knowledge, no methods have been developed to learn RRT$^*$ cost functions from demonstrations.
 
 
-In this paper, we propose Rapidly Exploring Learning Trees (RLT$^*$), which learns RRT$^*$ cost functions from demonstration. Specifically we modify Maximum Margin Planning to use RRT$^*$ as a planner. Furthermore, we propose a caching scheme that greatly reduces the computational cost of this approach. RLT$^*$ requires no additional planner assumptions other than those inherent in RRT$^*$, making it particularly easy to implement. 
-
-We evaluate RLT$^*$ on real and simulated data from a social navigation scenario. The results demonstrate that RLT$^*$ achieves better performance at lower computational cost than methods that learn path planning cost functions for deterministic planners.
+% In this paper, we propose Rapidly Exploring Learning Trees (), which learns RRT$^*$ cost functions from demonstration. Specifically we modify Maximum Margin Planning to use RRT$^*$ as a planner.  RLT$^*$ requires no additional planner assumptions other than those inherent in RRT$^*$, making it particularly easy to implement. 
 
 \section{Related Work}
 
 
-Substantial research has applied IRL to robotics \cite{henry2010learning,abbeel2008apprenticeship,vasquez2014inverse}. Because of the need to model the environment as an MDP, researchers usually discretise the state-action space. This introduces several key limitations. First, the size of the state-action space encountered in robotics is often prohibitive for such models. Second, the specific not all physical aspects of the robot can be easily expressed by such representations, introducing non-Markovian dynamics. 
+Substantial research has applied IRL to robotics \cite{henry2010learning,abbeel2008apprenticeship,vasquez2014inverse}.
+A big challenge in doing so is solving the forward planning problem under the current cost function at every iteration. The planning problem is expecially intractable in robotics where the state-action spaces encountered are continuous and high dimentional. Researchers thus resort to assumptions and approximations which reduce the computational cost of the procedure while allowing for high quality solutions. 
+
+A first straightforward approximation is to discretise the state and action spaces and solve the resulting MDP. Such methods quickly become impractical as the discretisation of both states and actions becomes finer and have thus only enjoyed success in toy domains. Other methods formulate the learning task in a way that only requires an optimal path (rather than an optimal policy). This along with the assumption of deterministic dynamics reduces the planning step to an instance of A$^*$ search \cite{ratliff2006maximum}, allowing more realistic problems to be tackled. In this paper we take a similar approach, however by planning using RRT$^*$ we are able to handle higher dimentional spaces with kinodynamic constrants. 
+
+Other approaches to the problem use hybrid planners. Inverse Optimal Heuristic Control \cite{ratliff2009inverse} models the long-term goals of the agent as a coarse state MDP, to ensure tractability, while using supervised learning to determine the local policy of the agent at each state. Graph-Based IOC \cite{byravan2015graph} uses discrete optimal control on a coarse graph and the actual path is executed using local trajectory optimisation techniques such as CHOMP \cite{ratliff2009chomp}, which would otherwise suffer from local minima. The method is effective in robotic manipulation tasks with many degrees of freedom.  However, these methods employ complex and domain-specific planning formulations that are not suitable for all robotics tasks. The method presented here employs widely used planners, making it versatile and easy to implement. Another more recent graph-based concept is that of Adaptive State Graphs \cite{okallearning}, which build a controller graph before doing any learning. This controller graph is akin to \emph{options} in semi-Markov decision processes, and allows for a more flexible representation of the state-action space. However, the controller used to learn underlying cost function is not the same as the one used to execute the robot's behaviour. This can have adverse effects since an implicit assumption of IRL is that the demonstration paths came from the same planner that we use during learning. This planner has specific representations, such as discretisation and parameters such as the discount factor. If these change, different policies arise. As a result a path that was optimal under a certain planner ceases to be optimal under another. Instead of building a controller graph first and then using different controllers to optimise trajectories, RLT$^*$ builds a controller tree on the fly. RLT$^*$ however uses the exact same planner during learning and execution.
+
+ All of the above methods require that the model dynamics are known. A different paradigm, that of model free IRL, uses the idea of importance sampling to deal with higher dimentional state-action spaces with unknown dynamics \cite{boularias2011relative}, \cite{kalakrishnan2013learning}. The sampling procedure is used approximate the statistics required to derive a gradient for the current cost function.  A big challenge in these methods is to find an appropriate importance distribution at each iteration. A more recent approach \cite{finn2016guided} considers guiding the importance distribution by simultaneouly learning a good policy under the current cost function and using it as an adaptive importance sampler. However the method uses a modified version of Linear Quadratic Regulator control to derive policies, this means that these policies are only locally optimal but are also greatly affected by the presence of obstacles in the environment. RRTs and their derivatives on the other hand are known for their capability to reliably deal with obstacles, while also being asymptotically optimal.
+
+
+
+
+
+
+% Because of the need to model the environment as an MDP, researchers usually discretise the state-action space. This introduces several key limitations. First, the size of the state-action space encountered in robotics is often prohibitive for such models. Second, the specific not all physical aspects of the robot can be easily expressed by such representations, introducing non-Markovian dynamics. 
 
 % \ks{Depending on the state-action space discretisation, past actions can infuence how easy it is to move to any a subsequent state. However the transition function only considers only one action in the past, and it is therefore an expectation over possible past configurations. As a result it tends to give the wrong probability distribution over next states for the actual physical system. Do I have to explain this in detail? Maybe Joao has a citation from his research?}
 
-To apply IRL to more realistic situations, researchers usually try to replace the MDP model while retaining the main idea behind IRL, i.e., learning the underlying cost function of a planner using data from demonstrations. Maximum Entropy IRL \cite{ziebart2010modelingthesis} works in domains with linear continuous dynamics with the optimal controller being a Linear-Quadratic Regulator. Since linear dynamics are hard to come by in robotics, \cite{2012-cioc} considers locally linear approximations. These bring about locally consistent rewards and achieve good performance in a range of tasks that were previously too hard for MDPs. However, the optimisation of the cost function using such planners is not guaranteed to be optimal. As our method is based on an RRT$^*$ planner, it is asymptotically optimal.
+% To apply IRL to more realistic situations, researchers usually try to replace the MDP model while retaining the main idea behind IRL, i.e., learning the underlying cost function of a planner using data from demonstrations. Maximum Entropy IRL \cite{ziebart2010modelingthesis} works in domains with linear continuous dynamics with the optimal controller being a Linear-Quadratic Regulator. Since linear dynamics are hard to come by in robotics, \cite{2012-cioc} considers locally linear approximations. These bring about locally consistent rewards and achieve good performance in a range of tasks that were previously too hard for MDPs. However, the optimisation of the cost function using such planners is not guaranteed to be optimal. As our method is based on an RRT$^*$ planner, it is asymptotically optimal.
 
-Other approaches to the problem use hybrid planners. Inverse Optimal Heuristic Control \cite{ratliff2009inverse} models the long-term goals of the agent as a coarse state MDP, to ensure tractability, while using supervised learning to determine the local policy of the agent at each state. Graph-Based IOC \cite{byravan2015graph} uses discrete optimal control on a coarse graph and the actual path is executed using local trajectory optimisation techniques such as CHOMP \cite{ratliff2009chomp}, which would otherwise suffer from local minima. The method is effective in robotic manipulation tasks with many degrees of freedom.  However, these methods employ complex and domain-specific planning formulations that are not suitable for all robotics tasks. The method presented here employs widely used planners, making it versatile and easy to implement. 
+% Other approaches to the problem use hybrid planners. Inverse Optimal Heuristic Control \cite{ratliff2009inverse} models the long-term goals of the agent as a coarse state MDP, to ensure tractability, while using supervised learning to determine the local policy of the agent at each state. Graph-Based IOC \cite{byravan2015graph} uses discrete optimal control on a coarse graph and the actual path is executed using local trajectory optimisation techniques such as CHOMP \cite{ratliff2009chomp}, which would otherwise suffer from local minima. The method is effective in robotic manipulation tasks with many degrees of freedom.  However, these methods employ complex and domain-specific planning formulations that are not suitable for all robotics tasks. The method presented here employs widely used planners, making it versatile and easy to implement. 
 
-Another more recent graph-based concept is that of Adaptive State Graphs \cite{okallearning}, which build a controller graph before doing any learning. This controller graph is akin to \emph{options} in semi-Markov decision processes, and allows for a more flexible representation of the state-action space. However, the controller used to learn underlying cost function is not the same as the one used to execute the robot's behaviour. This can have adverse effects since an implicit assumption of IRL is that the demonstration paths came from the same planner that we use during learning. This planner has specific representations, such as discretisation and parameters such as the discount factor. If these change, different policies arise. As a result a path that was optimal under a certain planner ceases to be optimal under another.
+% Another more recent graph-based concept is that of Adaptive State Graphs \cite{okallearning}, which build a controller graph before doing any learning. This controller graph is akin to \emph{options} in semi-Markov decision processes, and allows for a more flexible representation of the state-action space. However, the controller used to learn underlying cost function is not the same as the one used to execute the robot's behaviour. This can have adverse effects since an implicit assumption of IRL is that the demonstration paths came from the same planner that we use during learning. This planner has specific representations, such as discretisation and parameters such as the discount factor. If these change, different policies arise. As a result a path that was optimal under a certain planner ceases to be optimal under another.
 
-Instead of building a controller graph first and then using different controllers to optimise trajectories, RLT$^*$ builds a controller tree on the fly. RLT$^*$ however uses the exact same planner during learning and execution.
 
 
 \section{Background}
@@ -112,7 +129,7 @@ Because there could be several paths to the goal, path planners typically employ
 \begin{equation}
 	C(\zeta) = \sum_{i=1}^{l_{\zeta}-1} c(s_i,s_{i+1}).
 \end{equation}
-This cost functional is similar to the one encountered in optimal control as well as to value functions used in reinforcement learning. Given the cost functional, the path planner seeks an optimal path $\zeta^*$, which satisfies,
+This cost functional is similar to the one encountered in optimal control as well as to the return used in reinforcement learning. Given the cost functional, the path planner seeks an optimal path $\zeta^*$, which satisfies,
 \begin{equation}
  	\zeta^*_{o,g} = \argmin_{\zeta_{o,g} \in Z_{o,g}} C(\zeta), \label{eq:back_plan}
 \end{equation}
@@ -120,16 +137,16 @@ where $Z_{o,g}$ is the set of all possible paths such that $s_1 = o, s_{l_\zeta}
 
 Many path planning algorithms discretise $\mathcal{S}$ and use graph search algorithms like A$^*$ to find the optimal path. Under mild assumptions, these approaches are guaranteed to find the best path on the graph, therefore solving \eqref{eq:back_plan} for a subset $\tilde{Z}_{o,g} \in  Z_{o,g}$, whose size depends on the graph resolution (discretisation). However, such methods scale poorly in the size of $\mathcal{S}$, as larger and larger graphs need to be searched.
 
-These drawbacks motivate \emph{sample-based} path planning algorithms such as RRT$^*$ and PRM$^*$. The application focus of this paper is social robotic navigation, which typically consists of highly non-static environments. Therefore multi-query roadmap methods such as PRM$^*$ are not appropriate, since we would need to repeat the learning phase of the algorithm every time as the environment changes. As a result this paper employs RRT$^*$ as the underlying planner for the cost function learning process. 
+These drawbacks motivate \emph{sample-based} path planning algorithms such as RRT$^*$ . Instead of building a graph and then searching it, RRT$^*$ builds a tree on the fly and keeps track of the current best path. The algorithm, for which a detailed description and analysis can be found in \cite{karaman2011sampling}, essentially consists of two interleaved processes. 
 
- Instead of building a graph and then searching it, RRT$^*$ builds a tree on the fly and keeps track of the current best path. The algorithm, for which a detailed description and analysis can be found in \cite{karaman2011sampling}, essentially consists of two interleaved processes. 
-
-The first process is that of \emph{sampling}. A random point $s_{rand}$ is sampled from the configuration space. Next, the closest point $s_{closest}$, already in the existing vertex set $V$ is determined and a new point $s_{new}$ is created by \emph{steering} from  $s_{closest}$ to $s_{rand}$. The final step in the sampling process is to determine the radius neighbours, $S_{near}$, of the point $s_{new}$.
+The first process is that of \emph{sampling}. A random point $s_{rand}$ is sampled from the configuration space. Next, the closest point $s_{closest}$, already in the existing vertex set $V$ is determined and a new point $s_{new}$ is created by \emph{steering} from  $s_{closest}$ to $s_{rand}$. In the state space considers only the Euclidean space of points, then steering between two points means simply connecting them using a stright line. However if orientations and kinematic constraints are used then a different way to connect these points must be considered. The final step in the sampling process is to determine the points, $S_{near}$, within a radius of the point $s_{new}$.
 
 The second process is that of \emph{rewiring}. During this process, we determine which of the points in $S_{near}$ we should connect to $s_{new}$, i.e., determining which path to $s_{new}$ results in a lowest cost path. Finally we repeat the process for the parents of $S_{near}$. In other words, the tree is rewired locally around the new point, such that lower global cost paths arise.
 
-Repeating these two processes interchangably for a given time budget $T$, solves \eqref{eq:back_plan} for a subset $\tilde{Z}_{o,g}$ that is determined by the randomly sampled points. As $T \rightarrow \infty$, RRT$^*$ minimises over the entire $Z_{o,g}$, i.e., it is asymptotically optimal in time, (while A$^*$ is asymptotically optimal in resolution).
+Repeating these two processes interchangably for a given time budget $T$, solves \eqref{eq:back_plan} for a subset $\tilde{Z}_{o,g}$ that is determined by the randomly sampled points. As $T \rightarrow \infty$, RRT$^*$ minimises over the entire $Z_{o,g}$, i.e., it is asymptotically optimal in time \cite{karaman2011sampling}, (while A$^*$ is asymptotically optimal in resolution).
 
+
+% and PRM$^*$. The application focus of this paper is social robotic navigation, which typically consists of highly non-static environments. Therefore multi-query roadmap methods such as PRM$^*$ are not appropriate, since we would need to repeat the learning phase of the algorithm every time as the environment changes. As a result this paper employs RRT$^*$ as the underlying planner for the cost function learning process. 
 
 
 %  RRT$^*$ is also asymptotically optimal, i.e., it is guranteed to find an optimal path in $\mathcal{S}$ as the sampling time goes to infinity. Many variants of RRT$^*$ provide improved performance and faster convergence in practice by, for example, heuristically shriking the sampling space \cite{gammell2014informed}.
@@ -161,7 +178,7 @@ $Z_{o_i,g_i}$ can be large but if we have an optimisation procedure that solves 
 	C(\zeta^i_{o_i,g_i}) \leq \min_{\zeta \in Z_{o_i,g_i}} C(\zeta) \quad \forall i, \label{eq:const}
 \end{equation}
 
-Ratliff et al.\ \cite{ratliff2006maximum} propose a maximum margin variant of \eqref{eq:const} by introducing a margin function $L_i(\zeta)$ that decreases the cost of the proposed path $\zeta$ if is dissimilar to $\zeta^i_{o_i,g_i}$. For example, $L_i(\zeta)$ could be $-1$ times the number of configurations in the demonstration path not visited by $\zeta$. This margin is very similar to the one encountered in Support Vector Machines. The intuition is that by requiring the model to fit the data well even if we are using a margin against, will result in better generalisation. The full optimisation formulation of Maximum Margin Planning is as follows.
+Ratliff et al.\ \cite{ratliff2006maximum} propose a maximum margin variant of \eqref{eq:const} by introducing a margin function $L_i(\zeta)$ that decreases the cost of the proposed path $\zeta$ if is dissimilar to $\zeta^i_{o_i,g_i}$. For example, $L_i(\zeta)$ could be $-1$ times the number of configurations in the demonstration path not visited by $\zeta$. This margin is very similar to the one encountered in Support Vector Machines. The intuition is that by requiring the model to fit the data well even in the presense of a margin, will result in better generalisation. The full optimisation formulation of Maximum Margin Planning is as follows.
 \begin{equation}
 	\argmin_{\mathbf{w},\tau} \frac{1}{2}||\mathbf{w}||^2 + \frac{\lambda}{D} \sum_i \tau_i \label{eq:mas_marg}
 \end{equation}
@@ -371,27 +388,7 @@ In this section, we experimentally compare RLT$^*$ to the original MMP algorithm
 
 
 
-	\begin{figure}[tbh]
-%	\hspace{-5cm}
-	\centering
-      \begin{subfigure}[b]{0.42\columnwidth}
-    \includegraphics[scale=0.2]{images/person_feat2.png}
-    \caption{Social feature set S1}
-    \label{fig:S1}
-  \end{subfigure}
-  \hspace{10mm}
-  \begin{subfigure}[b]{0.42\columnwidth}
-  \hspace{4mm}
-    \includegraphics[scale=0.2]{images/person_feat1.png}
-    \caption{Social Featureset S2}
-    \label{fig:S2}
-  \end{subfigure} 
-  %\vspace{-3mm}
-  \caption{Two featuresets describing the cost around simulated people in the social scene. These features are introduced to investigate the effect of discrepancy between the features used by the demonstrator and those available by the learner.}
-    \vspace{-2mm}
-  %\vspace{-3mm}
-  \label{fig:setting}
-  \end{figure}
+
 
 
 	\begin{figure}[tbh]
@@ -415,6 +412,29 @@ In this section, we experimentally compare RLT$^*$ to the original MMP algorithm
 
     \vspace{-2mm}
 
+  %\vspace{-3mm}
+  \label{fig:setting}
+  \end{figure}
+
+
+	\begin{figure}[tbh]
+%	\hspace{-5cm}
+	\centering
+      \begin{subfigure}[b]{0.42\columnwidth}
+    \includegraphics[scale=0.2]{images/person_feat2.png}
+    \caption{Social feature set S1}
+    \label{fig:S1}
+  \end{subfigure}
+  \hspace{10mm}
+  \begin{subfigure}[b]{0.42\columnwidth}
+  \hspace{4mm}
+    \includegraphics[scale=0.2]{images/person_feat1.png}
+    \caption{Social Featureset S2}
+    \label{fig:S2}
+  \end{subfigure} 
+  %\vspace{-3mm}
+  \caption{Two featuresets describing the cost around simulated people in the social scene. These features are introduced to investigate the effect of discrepancy between the features used by the demonstrator and those available by the learner.}
+    \vspace{-2mm}
   %\vspace{-3mm}
   \label{fig:setting}
   \end{figure}
