@@ -52,9 +52,10 @@ shimon.whiteson@cs.ox.ac.uk
 
 \begin{document}
 
-
-
 \maketitle
+
+\sw{Is it double blind review?}
+
 \thispagestyle{empty}
 \pagestyle{empty}
 
@@ -62,7 +63,7 @@ shimon.whiteson@cs.ox.ac.uk
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
 Inverse Reinforcement Learning (IRL) for path planning enables robots to learn cost functions for difficult tasks from demonstration, instead of hard-coding them. However, IRL methods face practical limitations that stem from the need to repeat costly planning procedures.
-In this paper, we propose Rapidly Exploring Learning Trees (RLT$^*$), which learns the cost functions of Rapidly Exploring Random Trees (RRT) from demonstration, thereby making inverse learning methods applicable to more complex tasks. Our approach extends the Maximum Margin Planning to work with RRT$^*$ cost functions. Furthermore, we propose a caching scheme that greatly reduces the computational cost of this approach. Experimental results on simulated data from a social navigation scenario show that RLT$^*$ achieves better performance at lower computational cost than existing methods.
+In this paper, we propose Rapidly Exploring Learning Trees (RLT$^*$), which learns the cost functions of Rapidly Exploring Random Trees (RRT) from demonstration, thereby making inverse learning methods applicable to more complex tasks. Our approach extends Maximum Margin Planning to work with RRT$^*$ cost functions. Furthermore, we propose a caching scheme that greatly reduces the computational cost of this approach. Experimental results on simulated \sw{and real-robot} data from a social navigation scenario show that RLT$^*$ achieves better performance at lower computational cost than existing methods.  We also successfully deploy control policies learned with RLT$^*$ on a real telepresence robot.
 
 
 \end{abstract}
@@ -71,9 +72,9 @@ In this paper, we propose Rapidly Exploring Learning Trees (RLT$^*$), which lear
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-Learning from demonstration (LfD) \cite{argall2009survey} is of great interest to roboticists because it can avoid the need for tedious manual programming of complex behaviours. While most LfD methods rely on supervised learning (also known as behavioural cloning) to directly learn policies, certain approaches, namely inverse optimal control (IOC) \cite{kalman1964linear} and inverse reinforcement learning (IRL) \cite{abbeel2004apprenticeship} instead learn \emph{cost functions} from demonstration. These cost functions are then used to \emph{plan} the robot's behaviour. 
+Learning from demonstration (LfD) \cite{argall2009survey} is of great interest to roboticists because it can avoid the need for tedious manual programming of complex behaviours. While most LfD methods rely on supervised learning (i.e., behavioural cloning) to directly learn policies, certain approaches, namely inverse optimal control (IOC) \cite{kalman1964linear} and inverse reinforcement learning (IRL) \cite{abbeel2004apprenticeship} instead learn \emph{cost functions} from demonstration, which are then used to \emph{plan} the robot's behaviour. 
 
-Because cost functions abstract the planning procedure, they tend to be more general and robust to changes in the environment. Suppose the friction in the wheels of a robot changes due to wear and tear, this change should not affect the \emph{cost function}. Despite this, a robot trained using supervised learning will need to have its training either repeated or refined. A robot trained using IRL or IOC will simply need to take into account the changing dynamics in its planner, leaving the cost function unchanged. In addition, cost functions are thought to be more succinct representations of the aims of the agent \cite{abbeel2004apprenticeship}. For example, an agent whose aim is to get as fast as possible to a goal location will have a simple cost function but a rather complex and uninterpretable policy. 
+In addition, learned cost functions are often useful even when the environment changes.  For example, if the friction in a robot's wheels changes due to wear and tear, the optimal policy will change but the cost function will not. Thus, a robot trained via supervised learning would need to learn a new policy, while a robot trained via IRL could simply replan on the new dynamics with its existing cost function. In addition, cost functions are thought to be more succinct representations of the aims of the agent \cite{abbeel2004apprenticeship}. For example, a robot whose aim is to reach a goal as fast as possible may have a simple cost function but a complex policy. 
 
 In its most basic form IRL is an iterative process that in an inner loop solves the forward planning problem, i.e., finds an optimal policy under the current cost function and subsequently in the outer loop updates the current cost function appropriately. The procedure repeats until convergence. For continuous domains such as robotics, solving the planning problem exactly very quickly becomes intractable. If discretisation is chosen as a solution, then the curse of dimensionality places a limit on the fidelity with which the underlying state-action space can be modelled. In robotics, planning is very often performed using sample based, single query motion planners, namely Rapidly Exploring Random Trees(RRTs) \cite{lavalle1998rapidly} and their variants (cite). Such methods can deal with high dimentional continuous state spaces and elegantly handle motion constraints of the robot and obstacles in the environment.
 
