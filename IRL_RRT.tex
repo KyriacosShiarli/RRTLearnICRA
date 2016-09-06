@@ -403,15 +403,14 @@ We evaluate RLT$^*$ by comparing it to MMP, implemented using an A$^*$ planner, 
 	Our experiments take place in the context of socially intelligent navigation. IRL has been widely used in this setting \cite{okallearning,henry2010learning,vasquez2014inverse} because it is usually infeasible to hard-code the cost functions that a planner should use in complex social situations. Having the ability to quickly and effectively learn social navigation cost functions from demonstration would be a major asset for robots that operate in crowded environments such as airports \cite{triebel2015spencer}, museums \cite{thrun1999minerva} and care centres \cite{shiarlis2015teresa}.
 	
 	\subsection{Simulated Domain}
-	We firstly consider randomly generated social environments in simulation, such as the one shown in Figure \ref{fig:exp_setting}. Every arrow in the figure represents a person's position and orientation. The robot is given the task of navigating from one point in the room to another. While it is aware of the orientation and position of different people, it has no idea on how to trade off reaching the target quickly with avoiding people and obstacles, i.e., the cost function is unknown. Instead, the robot is given a dataset of demonstrations $D$. Each demonstration $\zeta_i$ is a set of configurations $s = (x,y)$ representing positions of the robot in the configuration space and each demonstration takes place for a different random configuration of the social environment, i.e., the people are at different positions and orientations every time. The task is to, using $D$, extract a cost function based on features of the environment, which in turn would allow it to behave socially in future tasks.
+	We first consider randomly generated social environments in simulation, such as the one shown in Figure \ref{fig:exp_setting}. Every arrow in the figure represents a person's position and orientation. The robot is given the task of navigating from one point in the room to another. While it is aware of the orientation and position of different people, it has no idea on how to trade off reaching the target quickly with avoiding people and obstacles, i.e., the cost function is unknown. Instead, the robot is given a dataset of demonstrations $D$. Each demonstration $\zeta_i$ is a set of configurations $s = (x,y)$ representing positions of the robot in the configuration space and each demonstration takes place for a different random configuration of the social environment, i.e., the people are at different positions and orientations every time. The task is to use $D$ to extract a cost function that enables socially intelligent behaviour.
 
-
-	The features we use can be divided in three categories. The first category encodes proxemics to the people present in the scene, i.e., the social features. Within this category we consider two feature sets, for reasons explained in the evaluation section.
+	The features we use can be divided in three categories. The first category encodes proxemics to the people present in the scene, i.e., the social features. Within this category we consider two variations, shown in Figure \ref{fig:setting}, for reasons explained in the following section.
 	\begin{itemize}
-		\item Social feature set 1 (S1): Three Gaussian functions of different means and diagonal covariances around each person. Shown in Figure \ref{fig:S1}.
-		\item Social feature set 2 (S2): Three `field of view' features of different angles and distances from the person. Shown in Figure \ref{fig:S2}.
+		\item {\bf Social feature set 1 (S1)}: Three Gaussians of different means and diagonal covariances around each person.  \sw{Is the mean set to the person's location?  It's unclear what this feature represents.}
+		\item {\bf Social feature set 2 (S2)}: Three field-of-view features of different angles and distances from the person. 
 	\end{itemize}
-	  The second category of features encodes the distance from the target location using linear, exponential and logarithmic functions. The final category encodes the obstacle cost using a stable function of the reciprocal of the distance from the nearest obstacle. Figure \ref{fig:cost_f} shows an example cost function over the whole configuration space for the configuration in Figure \ref{fig:exp_setting}. We use different functions for human and target proximity, to allow for more degrees of freedom when modeling the underlying cost function. Sufficient regularisation ensures that that the model does not overfit.
+	  The second category of features encodes the distance from the target location using linear, exponential and logarithmic functions. The third category encodes the obstacle cost using a stable function of the reciprocal of the distance from the nearest obstacle. Figure \ref{fig:cost_f} shows an example cost function over the whole configuration space for the configuration in Figure \ref{fig:exp_setting}. We use different functions for human and target proximity, to allow for more degrees of freedom when modelling the underlying cost function. Sufficient regularisation ensures that that the model does not overfit.
 
 
 
@@ -435,7 +434,7 @@ We evaluate RLT$^*$ by comparing it to MMP, implemented using an A$^*$ planner, 
   \end{subfigure} 
 
   %\vspace{-3mm}
-  \caption{(a) An instance of the randomised social navigation task. Arrows denote the position and orientation of people in the scene. The robot is on the lefthand side of the map and the green box in the bottom right denotes the goal location. (b) The corresponding cost function for the random scenario. Red denotes \emph{low} cost, while purple denotes \emph{high} cost.}
+  \caption{(a) An instance of the randomised social navigation task. Arrows denote the position and orientation of people in the scene. The robot is on the lefthand side of the map and the green box in the bottom right denotes the goal location. \sw{I don't see the robot or the goal in the figure.} (b) The corresponding cost function. Red denotes \emph{low} cost, while purple denotes \emph{high} cost.}
 
     \vspace{-2mm}
 
@@ -456,11 +455,11 @@ We evaluate RLT$^*$ by comparing it to MMP, implemented using an A$^*$ planner, 
   \begin{subfigure}[b]{0.42\columnwidth}
   \hspace{4mm}
     \includegraphics[scale=0.2]{images/person_feat1.png}
-    \caption{Social Featureset S2}
+    \caption{Social feature set S2}
     \label{fig:S2}
   \end{subfigure} 
   %\vspace{-3mm}
-  \caption{Two featuresets describing the cost around simulated people in the social scene. These features are introduced to investigate the effect of discrepancy between the features used by the demonstrator and those available by the learner.}
+  \caption{Two social feature sets describing people's locations. \sw{I have no idea what these plots are showing.}}
     \vspace{-2mm}
   %\vspace{-3mm}
   \label{fig:setting}
@@ -469,24 +468,24 @@ We evaluate RLT$^*$ by comparing it to MMP, implemented using an A$^*$ planner, 
 
 	\subsubsection{Evaluation}
 
-	To quantitatively assess the quality of our algorithms, we generate a dataset $D$ by planning near-optimal paths from initial configurations $s_o$ to goal configurations $s_g$ under a ground-truth cost function $c_{gt}()$ derived from ground-truth weights $\mathbf{w}_{gt}$ and features $\mathbf{F}_{gt}$ . A fully optimal path can only be derived asymptotically in terms of either time  for RRT$^*$, or resolution for A$^*$. In practice, however, we found that planning for 100 seconds using  RRT$^*$  achieves a path that is nearly optimal, as running longer leads to negligible changes in path cost. 
+	To evaluate our algorithms, we generate a dataset $D$ by planning near-optimal paths from initial configurations $s_o$ to goal configurations $s_g$ under a ground-truth cost function $c_{gt}()$ derived from ground-truth weights $\mathbf{w}_{gt}$ and features $\mathbf{F}_{gt}$. A fully optimal path can only be derived asymptotically in terms of either time  for RRT$^*$, or resolution for A$^*$. In practice, however, we found that planning for 100 seconds using  RRT$^*$  achieves a path that is nearly optimal; running longer leads to negligible changes in path cost. 
 
-	The resulting ground truth dataset is extremely useful for evaluation, which is otherwise very hard in IRL \ks{cite me?}. For each path $\zeta$ generated by the learning algorithm, we know its cost under the ground-truth cost function and features is simply  $\mathbf{w}_{gt}^T\mathbf{F}_{gt}(\zeta)$. Furthermore, we can compute the cost difference between the learned path and the demonstrated path path with respect to ground truth:
+	The resulting ground truth dataset enables a quantatitive empirical evaluation, which is otherwise problematic in IRL \ks{cite me?} \sw{sure, and others}. For each path $\zeta$ generated by the learning algorithm, we know its cost under the ground-truth cost function and features is simply  $\mathbf{w}_{gt}^T\mathbf{F}_{gt}(\zeta)$. Furthermore, we can compute the cost difference between the learned path and the demonstrated path path with respect to ground truth:
 	\begin{equation}
 		Q(\zeta,\zeta_i,\mathbf{w}_{gt}) = \mathbf{w}_{gt}^T(\mathbf{F}_{gt}(\zeta)-\mathbf{F}_{gt}(\zeta_i)), \label{eq:obj_eval}
 	\end{equation}
 which is our primary performance metric.  Note that, if the demonstration path $\zeta_i$ is optimal under $\mathbf{w}_{gt}$, then $Q(\zeta,\zeta_i,\mathbf{w}_{gt}) \geq 0$. For our simulated experiments, we consider two learning scenarios.
 \begin{enumerate}
-	\item \textbf{Unknown weights}. $\mathbf{w}_{gt}$ only is unknown. The demonstrations and the learning algorithm share social feature set S1.
-	\item \textbf{Unknown weights and features}. $\mathbf{w}_{gt}$ and $\mathbf{F}_{gt}$  are unknown. S2 is used to generate the demonstrations, S1 is used for learning.
+	\item \textbf{Unknown weights}: only $\mathbf{w}_{gt}$ is unknown. The demonstrations and the learning algorithm share social feature set S1.
+	\item \textbf{Unknown weights and features}: $\mathbf{w}_{gt}$ and $\mathbf{F}_{gt}$  are unknown. S2 is used to generate the demonstrations and S1 is used for learning.
 \end{enumerate}
 
-Scenario 1 is intended to evaluate the capability of the algorithms in question to learn the correct weights when provided only with limited demonstrations of the task. Scenario 2 introduces a feature discrepancy and thus better simulates a real situation, since it is unlikely that the features we define match exactly those considered by a human when demonstrating a path.
+The first scenario evaluates each algorithm's ability to learn good cost functions when provided only with limited demonstrations of the task. The second scenario introduces a feature discrepancy to better simulate real-world settings, since it is unlikely that the features we define will exactly match those implicitly used by the human demonstrator.
 % In both cases the ground-truth weights $\mathbf{w}_{gt}$ were chosen to induce a cost function that penalises passing in front of people. In addition, small weights were added to the person related features, as well as linear and exponential penalisation of the distance from the goal, so that the cost functions would not be too trivial. 
 
-We also document the total learning time for K iterations for the algorithms under comparison.  All algorithms were implemented in Python, share similar functions, and were not optimised for speed apart from the caching scheme in RLT$^*$. Finally we perform qualitative evaluation by visually comparing the learned cost functions for each algorithm and the paths they generate against their respective ground truth
+We also document the total learning time for K iterations for the algorithms under comparison.  All algorithms were implemented in Python, share similar functions, and were not optimised for speed apart from the caching scheme in RLT$^*$. Finally, we perform a qualitative evaluation by visually comparing the learned cost functions for each algorithm and the paths they generate against ground truth.
 
-	\subsubsection{Results on a holonomic robot.}
+	\subsubsection{Holonomic Robot Results}
 
 	Our dataset $D$ consists of 20 trajectories at random social social situations. We use 50\% of this data as the training dataset,  $D_{train}$ and 50\% for $D_{test}$. After being trained on $D_{train}$, the performance of a cost function is evaluated on $D_{test}$ using \eqref{eq:obj_eval}. The process is repeated 7 times for the same dataset but with different random compositions of $D_{train}$ and $D_{test}$. 
 	
@@ -526,7 +525,7 @@ We also document the total learning time for K iterations for the algorithms und
   \label{fig:results_qual}
   \end{figure}
 
-  \subsubsection{Results on a non-holonomic robot}
+  \subsubsection{Non-Holonomic Robot Results}
   As mentioned earlier, a potential advantage of RLT$^*$ is that it can efficiently handle learning in the case of motion constraints. In this paper we consider a robot planning in a three dimentional space, $(x,y,\theta)$, representing the position and orientation of the robot. The robot's motion is further subject to the following kinodynamic constraints.
 
   \begin{align}
