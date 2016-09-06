@@ -398,7 +398,7 @@ For RRT$^*$, the dependance of $\tilde{Z}_{o_i,g_i}$ on the time budget T is har
 
 \section{Experiments}
 
-In this section, we evaluate our contribution in 3 distinct cases. Firstly, we compare RLT$^*$ to the original MMP algorithm implemented using an A$^*$ planner and RLT-NC an ablated version of RLT$^*$ that does not use caching, in a simulated environment assuming a holonomic robot. We then assume a robot with non-holonomic kinematics and compare RLT$^*$with RLT-NC. We finally deploy RLT$^*$ on a real telepresence robot.
+We evaluate RLT$^*$ by comparing it to MMP, implemented using an A$^*$ planner, and RLT-NC, an ablated version of RLT$^*$ that does not use caching.  We consider three experimental settings: 1) a simulated holonomic robot, 2) a simulated non-holonomic robot, and 3) a real telepresence robot.
 	
 	Our experiments take place in the context of socially intelligent navigation. IRL has been widely used in this setting \cite{okallearning,henry2010learning,vasquez2014inverse} because it is usually infeasible to hard-code the cost functions that a planner should use in complex social situations. Having the ability to quickly and effectively learn social navigation cost functions from demonstration would be a major asset for robots that operate in crowded environments such as airports \cite{triebel2015spencer}, museums \cite{thrun1999minerva} and care centres \cite{shiarlis2015teresa}.
 	
