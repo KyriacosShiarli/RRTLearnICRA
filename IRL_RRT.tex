@@ -398,7 +398,7 @@ For RRT$^*$, the dependance of $\tilde{Z}_{o_i,g_i}$ on the time budget T is har
 
 \section{Experiments}
 
-We evaluate RLT$^*$ by comparing it to MMP, implemented using an A$^*$ planner, and RLT-NC, an ablated version of RLT$^*$ that does not use caching.  We consider three experimental settings: 1) a simulated holonomic robot, 2) a simulated non-holonomic robot, and 3) a real telepresence robot.
+We evaluate RLT$^*$ by comparing it to MMP, implemented using an A$^*$ planner, and RLT-NC \sw{Shouldn't it be RLT$^*$-NC?}, an ablated version of RLT$^*$ that does not use caching.  We consider three experimental settings: 1) a simulated holonomic robot, 2) a simulated non-holonomic robot, and 3) a real telepresence robot.
 	
 	Our experiments take place in the context of socially intelligent navigation. IRL has been widely used in this setting \cite{okallearning,henry2010learning,vasquez2014inverse} because it is usually infeasible to hard-code the cost functions that a planner should use in complex social situations. Having the ability to quickly and effectively learn social navigation cost functions from demonstration would be a major asset for robots that operate in crowded environments such as airports \cite{triebel2015spencer}, museums \cite{thrun1999minerva} and care centres \cite{shiarlis2015teresa}.
 	
@@ -493,7 +493,7 @@ We also document the total learning time for K iterations for the algorithms und
 	
 	 Figures \ref{fig:res_sim1} and \ref{fig:res_sim2} show the results for the two scenarios described earlier. MMP\_X (green) refers to MMP with X meters of grid resolution while  RLT\_X (red) and RLT-NC\_X (blue) refer to RLT and RLT without caching, respectively, with X seconds of planning.  Since lower is better for both cost difference and learning time, the closer a point is to the bottom left corner, the better.
 	 
-	 RLT$^*$ (red) dominates a large portion of the Pareto front, demonstrating good performance and generalisation in reasonable time. Furthermore, caching not only speeds learning in RLT$^*$, it also modestly reduces cost differences. This suggests that the caching scheme introduces extra robustness and generalisation capabilities within the algorithm. \sw{This needs to be tied back to the consistency/momentum argument of Section 4.2.} The performance of RLT$^*$ and RLT-NC significantly degrades at very low planning times (2 seconds) because AMMP cannot sample good enough paths to compute a satisfactory gradient. Finally, MMP's learning time scales exponentially with the size of the grid. This, however, is not solely due to the graph getting larger but also because A$^*$ search scales poorly with the complexity of the cost function itself. Because it relies on an admissible heuristic that for complex cost functions is no longer tight, A$^*$ must expand many more states. By contrast, the sample-based RLT$^*$ is susceptible to such problems.
+	 RLT$^*$ (red) dominates a large portion of the Pareto front, demonstrating good performance and generalisation in reasonable time. Furthermore, caching not only speeds learning in RLT$^*$, it also modestly reduces cost differences. This suggests that the caching scheme introduces extra robustness and generalisation capabilities within the algorithm. \sw{This needs to be tied back to the consistency/momentum argument of Section 4.2.} The performance of RLT$^*$ and RLT-NC significantly degrades at very low planning times (2 seconds) because AMMP cannot sample good enough paths to compute a useful gradient. Finally, MMP's learning time scales exponentially with the size of the grid. This, however, is not solely due to the graph getting larger but also because A$^*$ search scales poorly with the complexity of the cost function itself. Since it relies on an admissible heuristic that for complex cost functions is no longer tight, A$^*$ must expand many more states. By contrast, the sample-based RLT$^*$ is less susceptible to such problems.
 
 	\begin{figure}[tbh]
 	\centering
@@ -501,17 +501,17 @@ We also document the total learning time for K iterations for the algorithms und
 	\hspace{-1cm}
       \begin{subfigure}[b]{0.41\columnwidth}
     \includegraphics[scale=0.25]{images/pf_same.png}
-    \caption{Scenario 1: Same features, different weights.}
+    \caption{Unknown weights scenario.}
     \label{fig:res_sim1}
   \end{subfigure}
      	\hspace{10mm}
   \begin{subfigure}[b]{0.41\columnwidth}
 
     \includegraphics[scale=0.25]{images/pf_different.png}
-    \caption{Scenario 2: Different features and weights.}
+    \caption{Unknown weights and features scenario.}
     \label{fig:res_sim2}
   \end{subfigure} 
-    \caption{Validation dataset results for 6 intependent learing runs on ground truth evaluated scenarios. Plots show the three algorithms in question, MMP(green), RLT-NC(blue), RLT (red) at different planning fidelities. On both axes \emph{lower is better}, forming an inverted Pareto front.}
+    \caption{Learning time vs.\ cost difference on the holonomic robot for MMP (green), RLT-NC (blue), and RLT (red) at different planning fidelities. On both axes \emph{lower is better}.}
     \vspace{-2mm}
   %\vspace{-3mm}
   \label{fig:results_sim}
@@ -521,22 +521,25 @@ We also document the total learning time for K iterations for the algorithms und
 %	\hspace{-5cm}
 	\centering
     \includegraphics[scale=0.15]{images/cf_w_plans.png}
-    \caption{Qualitative evaluation of simulated results. The colormap denotes the learned cost function. Red denotes \emph(low) cost and green \emph{high} cost. The learned path (red) is very similar to the demonstrated path (black) with a clear improvement over the path before learning (purple). This example was taken from the validation set, and thus not a case of overfitting. }
+    \caption{Qualitative evaluation of simulated results. The colormap denotes the learned cost function. Red denotes \emph(low) cost and green \emph{high} cost. The learned path (red) is very similar to the demonstrated path (black) with a clear improvement over the path before learning (purple). This example was taken from the validation set, and thus not a case of overfitting. \sw{Where is this figure discussed?} }
     \vspace{-2mm}
   %\vspace{-3mm}
   \label{fig:results_qual}
   \end{figure}
 
   \subsubsection{Non-Holonomic Robot Results}
-  As mentioned earlier, a potential advantage of RLT$^*$ is that it can efficiently handle learning in the case of motion constraints. In this paper we consider a robot planning in a three dimentional space, $(x,y,\theta)$, representing the position and orientation of the robot. The robot's motion is further subject to the following kinodynamic constraints.
-
+  As mentioned earlier, a potential advantage of RLT$^*$ is that it can efficiently handle learning in the case of motion constraints. In this paper we consider a robot planning in a three dimentional space, $(x,y,\theta)$, representing the position and orientation of the robot. The robot's motion is further subject to the following kinodynamic constraints:
+%
   \begin{align}
   	&\dot{x} = v\times\cos(\theta),\\
   	&\dot{y} = v\times\sin(\theta),\\
   	&\dot{\theta} = \omega,
   \end{align}
   where $v,\omega$ are the linear and angular velocities respectively.
-  To meet these constraints we use the POSQ $\texttt{Steer}$ function described in \cite{palmieri2014novel}. We employ the specific steering mechanism for two reasons. Firstly, it gives a local closed loop policy between two vertices of the tree, it is thus more robust to noise and uncertainty in the motion. Secondly is has shown its capability to produce smooth paths between feasible configurations. Evaluation is done in much the same way as in the previous section, with the exception that due to the inability of MMP to handle kinodynamic constraints we only compare between RLT$^*$ and RLT-NC. In this case RLT-NC was given 100 seconds to plan, in which case about 3000 configurations were sampled, this was thus the cache size the RLT$^*$ was allowed have during learning. The results are reported in Figure \ref{fig:results_kino}. In Figure \ref{fig:res_kino1} we can see that RLT$^*$ is an order of magnitute faster than RLT-NC. The kinematic constraints are an important aspect of this speedup since they make the \texttt{Steer} and \texttt{Safe} procedures (which are cached) more expensive. Furthermore, Figure \ref{fig:res_kino2} further suggests that RLT$^*$ results in more stable learning and better performance.
+  To meet these constraints, we use the POSQ $\texttt{Steer}$ function \cite{palmieri2014novel}.  Since this approach gives a local closed-loop policy between two vertices of the tree, it is  more robust to noise and uncertainty in the motion. Furthermore, it has been shown to produce smooth paths between feasible configurations \cite{palmieri2014novel}. Evaluation is done in much the same way as in the previous section, except that we compare RLT$^*$ only to RLT-NC and not MMP, as the latter cannot handle kinodynamic constraints. \sw{Earlier we were calling these "obstacles and motion constraints."  It's important to be consistent throughout.}
+RLT-NC was given 100 seconds to plan, in which case about 3000 configurations were sampled, and RLT$^*$'s cache was set to this size. 
+
+Figure \ref{fig:res_kino1} shows that RLT$^*$ is an order of magnitude faster than RLT-NC. \sw{But it also shows lower cost difference.} The kinematic constraints contribute to this speedup since they make the \texttt{Steer} and \texttt{Safe} procedures, which are cached, more expensive. Figure \ref{fig:res_kino2} shows that RLT$^*$ produces in more stable learning and lower cost differences. \sw{What does the learning curve add exactly?}
 
   	\begin{figure}[tbh]
 	\centering
@@ -544,17 +547,17 @@ We also document the total learning time for K iterations for the algorithms und
 	\hspace{-1cm}
       \begin{subfigure}[b]{0.42\columnwidth}
     \includegraphics[scale=0.25]{images/pareto_front_kino.png}
-    \caption{Time taken vs final learning cost difference }
+    \caption{Learning time vs.\ cost difference.}
     \label{fig:res_kino1}
   \end{subfigure}
      	\hspace{10mm}
   \begin{subfigure}[b]{0.42\columnwidth}
 
     \includegraphics[scale=0.25]{images/cost_diff_val_kino.png}
-    \caption{Learning curve for motion constrained learning}
+    \caption{Learning curve}
     \label{fig:res_kino2}
   \end{subfigure} 
-    \caption{Learning in the presence of motion constraints for RLT$^*$ and RLT-NC. RLT$^*$ results in better and faster learning when compared to its completely stochastic counterpart. Reported results are for the validation dataset.}
+    \caption{Non-holonomic robot results.}
     \vspace{-2mm}
   %\vspace{-3mm}
   \label{fig:results_kino}
