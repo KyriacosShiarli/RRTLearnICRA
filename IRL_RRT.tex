@@ -402,7 +402,7 @@ We evaluate RLT$^*$ by comparing it to MMP, implemented using an A$^*$ planner, 
 	
 	Our experiments take place in the context of socially intelligent navigation. IRL has been widely used in this setting \cite{okallearning,henry2010learning,vasquez2014inverse} because it is usually infeasible to hard-code the cost functions that a planner should use in complex social situations. Having the ability to quickly and effectively learn social navigation cost functions from demonstration would be a major asset for robots that operate in crowded environments such as airports \cite{triebel2015spencer}, museums \cite{thrun1999minerva} and care centres \cite{shiarlis2015teresa}.
 	
-	\subsection{Simulated Domain}
+	\subsection{Simulated Experiments}
 	We first consider randomly generated social environments in simulation, such as the one shown in Figure \ref{fig:exp_setting}. Every arrow in the figure represents a person's position and orientation. The robot is given the task of navigating from one point in the room to another. While it is aware of the orientation and position of different people, it has no idea on how to trade off reaching the target quickly with avoiding people and obstacles, i.e., the cost function is unknown. Instead, the robot is given a dataset of demonstrations $D$. Each demonstration $\zeta_i$ is a set of configurations $s = (x,y)$ representing positions of the robot in the configuration space and each demonstration takes place for a different random configuration of the social environment, i.e., the people are at different positions and orientations every time. The task is to use $D$ to extract a cost function that enables socially intelligent behaviour.
 
 	The features we use can be divided in three categories. The first category encodes proxemics to the people present in the scene, i.e., the social features. Within this category we consider two variations, shown in Figure \ref{fig:setting}, for reasons explained in the following section.
@@ -565,16 +565,12 @@ Figure \ref{fig:res_kino1} shows that RLT$^*$ is an order of magnitude faster th
 
 
 	\subsection{Real Robot Experiments}
-	In this section we demonstrate the real world functionality of RLT$^*$. We use data of real, human demonstrations in a social navigation scenario. Using this data we learn a cost function which we deploy back on the real robot to assess performance. 
+	In this section, we apply RLT$^*$ to real, human demonstrations using a telepresence robot in a social navigation scenario. Furthermore, we deploy the learned cost function on the actual robot.
+	The experiments take place in a simplified version of the social scenarios we have seen in the previous section. There are two people in the scene at different positions and orientations. A human demonstrator is asked to execute paths for different initial and final conditions across the room. The task is similar to the one used in \cite{okallearning} and the purpose is to find cost functions that account for potential relationships between people depending on their orientation with respect to each other. For example, if people are facing each other, they are more likely engaged in conversation or some other activity (e.g., taking a photograph) and should not be interrupted. By contrast, if they are looking away from each other and there is enough distance between them then, it might be better to pass between them if doing so yields a shorter path.
 
-	\subsubsection{Data and Setup}
-	The experiments take place in a simplified version of the social scenarios we have seen in the previous section. In this case we have two people in the scene at different positions and orientations. A human demonstrator is asked to execute paths for different initial and final conditions across the room. The task is similar to the one used in \cite{okallearning} and the purpose is to find cost functions that account for potential relationships between people depending on their orientation with respect to each other. For example if people are facing each other, they are more likely engaged in conversation or some other activity (e.g., taking a photograph) and should not be interrupted. On the other hand if they are looking away from each other and there is enough distance between them then it might be better to pass between them in order to reach the goal earlier.
+	To collect data for learning and validation, we use an off-the-shelf telepresence system augmented with several sensors that allow localisation and perception \cite{shiarlis2015teresa}. We use an Optitrack motion-capture system to accurately collect ground truth data of both people robot positions. RLT$^*$ learns a cost function from this data using the social feature set S1 and the rest of the features described earlier.
 
-	To collect the data for learning as well as to validate the learned cost function we use an off-the-shelf telepresence system augmented with several sensors that allow localisation and perception \footnote{www.teresaproject.eu}. We use the Optitrack \footnote{www.optitrack.com} motion capture system in order to accurately collect ground truth data of both people robot positions. The data is used to learn a cost function using the social feature set S1 and the rest of the features described in the previous section.
-	\subsubsection{Results}
-	Objective evaluation of the learning using real data is in general hard using IRL since the ground truth cost function is not given. We therefore resort to more qualitative means of comparison. 
-
-	First we report results with regards to the datasets used for training and validation. Figure \ref{fig:results_real}  shows some interesting cases that arose during learning. For example, in Figures \ref{fig:res_real1} and \ref{fig:res_real2}   we can see instances where the learning algorithm produced paths (red) that are very similar to the ones of the expert (black). Figures \ref{fig:res_real3} and \ref{fig:res_real4} show instances where that the learned paths are reasonable paths to follow, despite the fact that the are not qualitatively similar to the demonstrated paths.
+Since quantitative evaluation is difficult using real data, as no ground truth is available, we perform a qualitative evaluation instead. Figure \ref{fig:results_real} shows some representative cases that arose during learning. Figures \ref{fig:res_real1} and \ref{fig:res_real2}  show cases where RLT$^*$ produced paths (red) that are very similar to the demonstrated ones (black). Figures \ref{fig:res_real3} and \ref{fig:res_real4} show instances where  the learned paths are reasonable even though they are not similar to the demonstrated paths.
 
 			\begin{figure}[tbh]
 %	\hspace{-5cm}
@@ -604,20 +600,20 @@ Figure \ref{fig:res_kino1} shows that RLT$^*$ is an order of magnitude faster th
     \caption{}
     \label{fig:res_real4}
   \end{subfigure} 
-    \caption{Comparing real demonstrated paths (black), learned paths (red), and shortest path (purple). (a) + (b): Instances where the learned path is very similar to the deonstrated path. (c) + (d): Instances where the learned path is not the same as the demonstrated path, but reasonable.}
+    \caption{Real demonstrated paths (black), learned paths (red), and shortest paths (purple). In (a,b), the learned path is similar to the demonstrated path; in (c,d) it is different but reasonable.}
     \vspace{-2mm}
   %\vspace{-3mm}
   \label{fig:results_real}
   \end{figure}
 
-	The learned cost function shown in Figure \ref{fig:real_cf} was then deployed on a real telepresence robot. Suplementary material demonstrating the deployment can be found online \footnote{ADD LINK TO VIDEO}.
+	Finally, we deployed the learned cost function, shown in Figure \ref{fig:real_cf}, on a real telepresence robot. A video demonstrating this deployment can be found online \footnote{ADD LINK TO VIDEO}. \sw{Qualitatively describe the deployment.  Was it a success?}
 
 
 	\begin{figure}[tbh]
 %	\hspace{-5cm}
 	\centering
     \includegraphics[scale=0.15]{images/cf_real.png}
-    \caption{Cost function learned using data from real demosntrations using a telepresence robot.}
+    \caption{Cost function learned using data from real demonstrations on a telepresence robot.}
     \vspace{-2mm}
   %\vspace{-3mm}
   \label{fig:real_cf}
@@ -705,9 +701,10 @@ Figure \ref{fig:res_kino1} shows that RLT$^*$ is an order of magnitude faster th
  %  \end{figure}
 
 \vspace{-1mm}
-\section{Discussion and Conclusion}
-In this paper, we proposed the Rapidly Exploring Learning Tree (RLT$^*$), which learns the cost functions of Rapidly Exploring Random Trees (RRT) from demonstration, thereby making inverse learning methods applicable to more complex tasks. Our approach extends the Maximum Margin Planning to work with RRT$^*$ cost functions. Furthermore, it uses a caching scheme that greatly reduces the computational cost and improves the performance of this approach. We have demonstrated thorough experimentation and comparison with the original MMP algorithm in simulated social navigation tasks. The results suggest that RLT$^*$ achieves better performance at lower computational cost even in cases where there is a discrepancy in the features used between the demonstrations and the learning algorithm. Furthermore, we have shown that our algorithm can handle higher dimentional configuration spaces with motion constraints. Finally, we used RLT$^*$ to effectively learn cost functions using data of real demonstrations and social situations further demonstrating its applicability in the real world.
-An important point to discuss is the static nature of our experiments. Since our methods do not have a model of how features will evolve over time it is not possible to take peoples movement into account directly into the planning process. For complex social path planning applications, it seems that the method of choice cite  is to replan every few timesteps \cite{vasquez2014inverse} \cite{henry2010learning}. Replanning in RRT$^*$ has been succesfully proposed and can be used in this case \cite{otte2015rrtx}. We reserve the exploration of such topics to future work.
+\section{Conclusion \& Future Work}
+In this paper, we proposed the Rapidly Exploring Learning Trees (RLT$^*$), which learns the cost functions of Rapidly Exploring Random Trees (RRT) from demonstration, thereby making inverse learning methods applicable to more complex tasks. Our approach extends the Maximum Margin Planning to work with RRT$^*$ cost functions. Furthermore, it uses a caching scheme that greatly reduces the computational cost and improves performance. Our results in simulated social navigation scenarios show that RLT$^*$ achieves better performance at lower computational cost, even when there is a discrepancy between the features used for demonstration and learning. Furthermore, our results show that RLT$^*$ can handle more complex configuration spaces with motion constraints. Finally, we used RLT$^*$ to learn a cost function using data of real demonstrations on a telepresence robot and successfully deployed that cost function back on the robot.
+
+In future work, we hope to extend RLT$^*$ to model how features evolve over time, in order to e.g., consider people's movement during planning.  For complex social path planning applications, periodic replanning has been shown to help \cite{vasquez2014inverse,henry2010learning}. Replanning in RRT$^*$ is also possible \cite{otte2015rrtx} and could potentially be incorporated into RLT$*$.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
