@@ -407,8 +407,8 @@ We evaluate RLT$^*$ by comparing it to MMP, implemented using an A$^*$ planner, 
 
 	The features we use can be divided in three categories. The first category encodes proxemics to the people present in the scene, i.e., the social features. Within this category we consider two variations, shown in Figure \ref{fig:setting}, for reasons explained in the following section.
 	\begin{itemize}
-		\item {\bf Social feature set 1 (S1)}: Three Gaussians of different means and diagonal covariances around each person.  \sw{Is the mean set to the person's location?  It's unclear what this feature represents.}
-		\item {\bf Social feature set 2 (S2)}: Three field-of-view features of different angles and distances from the person. 
+		\item {\bf Social feature set 1 (S1)}: Three Gaussians of different means and diagonal covariances around each person. Figure \ref{fig:S1}.  \sw{Is the mean set to the person's location?  It's unclear what this feature represents.}
+		\item {\bf Social feature set 2 (S2)}: Three field-of-view features of different angles and distances from the person. Figure \ref{fig:S2}.
 	\end{itemize}
 	  The second category of features encodes the distance from the target location using linear, exponential and logarithmic functions. The third category encodes the obstacle cost using a stable function of the reciprocal of the distance from the nearest obstacle. Figure \ref{fig:cost_f} shows an example cost function over the whole configuration space for the configuration in Figure \ref{fig:exp_setting}. We use different functions for human and target proximity, to allow for more degrees of freedom when modelling the underlying cost function. Sufficient regularisation ensures that that the model does not overfit.
 
@@ -448,7 +448,7 @@ We evaluate RLT$^*$ by comparing it to MMP, implemented using an A$^*$ planner, 
 	\centering
       \begin{subfigure}[b]{0.42\columnwidth}
     \includegraphics[scale=0.2]{images/person_feat2.png}
-    \caption{Social feature set S1}
+    \caption{Social feature set S1.}
     \label{fig:S1}
   \end{subfigure}
   \hspace{10mm}
@@ -459,7 +459,7 @@ We evaluate RLT$^*$ by comparing it to MMP, implemented using an A$^*$ planner, 
     \label{fig:S2}
   \end{subfigure} 
   %\vspace{-3mm}
-  \caption{Two social feature sets describing people's locations. \sw{I have no idea what these plots are showing.}}
+  \caption{Cost functions resulting from linear combinations of the social featuresets. Figure \ref{fig:S1} demonstrates featureset 1. It consists of three isotropic Gaussian functions centered in front in the center and behind the person. Figure \ref{fig:S2} shows the field-of-view features of featureset S2. \sw{I have no idea what these plots are showing.} \ks{Now?}}
     \vspace{-2mm}
   %\vspace{-3mm}
   \label{fig:setting}
@@ -493,7 +493,7 @@ We also document the total learning time for K iterations for the algorithms und
 	
 	 Figures \ref{fig:res_sim1} and \ref{fig:res_sim2} show the results for the two scenarios described earlier. MMP\_X (green) refers to MMP with X meters of grid resolution while  RLT\_X (red) and RLT-NC\_X (blue) refer to RLT and RLT without caching, respectively, with X seconds of planning.  Since lower is better for both cost difference and learning time, the closer a point is to the bottom left corner, the better.
 	 
-	 RLT$^*$ (red) dominates a large portion of the Pareto front, demonstrating good performance and generalisation in reasonable time. Furthermore, caching not only speeds learning in RLT$^*$, it also modestly reduces cost differences. This suggests that the caching scheme introduces extra robustness and generalisation capabilities within the algorithm. \sw{This needs to be tied back to the consistency/momentum argument of Section 4.2.} The performance of RLT$^*$ and RLT-NC significantly degrades at very low planning times (2 seconds) because AMMP cannot sample good enough paths to compute a useful gradient. Finally, MMP's learning time scales exponentially with the size of the grid. This, however, is not solely due to the graph getting larger but also because A$^*$ search scales poorly with the complexity of the cost function itself. Since it relies on an admissible heuristic that for complex cost functions is no longer tight, A$^*$ must expand many more states. By contrast, the sample-based RLT$^*$ is less susceptible to such problems.
+	 RLT$^*$ (red) dominates a large portion of the Pareto front, demonstrating good performance and generalisation in reasonable time. Furthermore, caching not only speeds learning in RLT$^*$, it also modestly reduces cost differences. This suggests that the caching scheme introduces extra robustness and generalisation capabilities within the algorithm. As mentioned in Section \ref{subsec:cached} we believe that the caching scheme provides makes the gradients smoother and more consistent. To show this we plot the inner product between successive gradients during learning in Figure cite. We can see that the gradients of RLT$^*$ are clearly smoother, which further reinforces our claim. \sw{This needs to be tied back to the consistency/momentum argument of Section 4.2.} The performance of RLT$^*$ and RLT-NC significantly degrades at very low planning times (2 seconds) because AMMP cannot sample good enough paths to compute a useful gradient. Finally, MMP's learning time scales exponentially with the size of the grid. This, however, is not solely due to the graph getting larger but also because A$^*$ search scales poorly with the complexity of the cost function itself. Since it relies on an admissible heuristic that for complex cost functions is no longer tight, A$^*$ must expand many more states. By contrast, the sample-based RLT$^*$ is less susceptible to such problems.
 
 	\begin{figure}[tbh]
 	\centering
@@ -527,6 +527,16 @@ We also document the total learning time for K iterations for the algorithms und
   \label{fig:results_qual}
   \end{figure}
 
+ 	\begin{figure}[tbh]
+%	\hspace{-5cm}
+	\centering
+    \includegraphics[scale=0.23]{images/momentum.png}
+    \caption{Inner product of succcessive gradients during learning. The smoother curve for RLT$^*$ suggests that fixing the sampled points during learning introduces some notion of momentum. }
+    \vspace{-2mm}
+  %\vspace{-3mm}
+  \label{fig:in_prod_grad}
+  \end{figure}
+
   \subsubsection{Non-Holonomic Robot Results}
   As mentioned earlier, a potential advantage of RLT$^*$ is that it can efficiently handle learning in the case of motion constraints. In this paper we consider a robot planning in a three dimentional space, $(x,y,\theta)$, representing the position and orientation of the robot. The robot's motion is further subject to the following kinodynamic constraints:
 %
@@ -539,7 +549,7 @@ We also document the total learning time for K iterations for the algorithms und
   To meet these constraints, we use the POSQ $\texttt{Steer}$ function \cite{palmieri2014novel}.  Since this approach gives a local closed-loop policy between two vertices of the tree, it is  more robust to noise and uncertainty in the motion. Furthermore, it has been shown to produce smooth paths between feasible configurations \cite{palmieri2014novel}. Evaluation is done in much the same way as in the previous section, except that we compare RLT$^*$ only to RLT-NC and not MMP, as the latter cannot handle kinodynamic constraints. \sw{Earlier we were calling these "obstacles and motion constraints."  It's important to be consistent throughout.}
 RLT-NC was given 100 seconds to plan, in which case about 3000 configurations were sampled, and RLT$^*$'s cache was set to this size. 
 
-Figure \ref{fig:res_kino1} shows that RLT$^*$ is an order of magnitude faster than RLT-NC. \sw{But it also shows lower cost difference.} The kinematic constraints contribute to this speedup since they make the \texttt{Steer} and \texttt{Safe} procedures, which are cached, more expensive. Figure \ref{fig:res_kino2} shows that RLT$^*$ produces in more stable learning and lower cost differences. \sw{What does the learning curve add exactly?}
+Figure \ref{fig:res_kino1} shows that RLT$^*$ is an order of magnitude faster than RLT-NC, while achieving a lower cost difference. The kinematic constraints contribute to this speedup since they make the \texttt{Steer} and \texttt{Safe} procedures, which are cached, more expensive. Figure \ref{fig:res_kino2} shows that RLT$^*$ results in more stable learning. \sw{What does the learning curve add exactly?}
 
   	\begin{figure}[tbh]
 	\centering
@@ -566,7 +576,8 @@ Figure \ref{fig:res_kino1} shows that RLT$^*$ is an order of magnitude faster th
 
 	\subsection{Real Robot Experiments}
 	In this section, we apply RLT$^*$ to real, human demonstrations using a telepresence robot in a social navigation scenario. Furthermore, we deploy the learned cost function on the actual robot.
-	The experiments take place in a simplified version of the social scenarios we have seen in the previous section. There are two people in the scene at different positions and orientations. A human demonstrator is asked to execute paths for different initial and final conditions across the room. The task is similar to the one used in \cite{okallearning} and the purpose is to find cost functions that account for potential relationships between people depending on their orientation with respect to each other. For example, if people are facing each other, they are more likely engaged in conversation or some other activity (e.g., taking a photograph) and should not be interrupted. By contrast, if they are looking away from each other and there is enough distance between them then, it might be better to pass between them if doing so yields a shorter path.
+
+	The experiments take place in a simplified version of the social scenarios we have seen in the previous section. There are two people in the scene at different positions and orientations. A human demonstrator is asked to execute paths for different initial and final conditions across the room. The task is similar to the one used in \cite{okallearning} and the purpose is to find cost functions that account for potential relationships between people depending on their orientation with respect to each other. For example, if people are facing each other, they are more likely engaged in conversation or some other activity (e.g., taking a photograph) and should not be interrupted. By contrast, if they are looking away from each other and there is enough distance between them then, it might be better to pass between them if doing so yields a shorter path.
 
 	To collect data for learning and validation, we use an off-the-shelf telepresence system augmented with several sensors that allow localisation and perception \cite{shiarlis2015teresa}. We use an Optitrack motion-capture system to accurately collect ground truth data of both people robot positions. RLT$^*$ learns a cost function from this data using the social feature set S1 and the rest of the features described earlier.
 
