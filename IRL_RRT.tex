@@ -2,9 +2,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 
-\documentclass{article}  % Comment this line out if you need a4paper
-
-\usepackage{ijcai16}
+\documentclass[letterpaper, 10 pt, conference]{ieeeconf} 
 \usepackage{times}
 \usepackage{algorithmic}
 \usepackage{algorithm}
@@ -21,10 +19,6 @@
 %\usepackage{times} % assumes new font selection scheme installed
 %\usepackage{amsmath} % assumes amsmath package installed
 %\usepackage{amssymb}  % assumes amsmath package installed
-
-\title{\LARGE \bf
-Rapidly Exploring Learning Trees
-}
 \usepackage{mathtools}
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -32,18 +26,43 @@ Rapidly Exploring Learning Trees
 \usepackage{amssymb}
 \DeclareMathOperator*{\argmin}{\arg\!\min} 
 \DeclareMathOperator*{\argmax}{\arg\!\max} 
-\author{Kyriacos Shiarlis \\
-University of Amsterdam \\
-k.c.shiarlis@uva.nl
-\And 
-Joao Messias \\
-University of Amsterdam \\ 
-jmessias@uva.nl 
-\And
-Shimon Whiteson \\
-University of Oxford \\
-shimon.whiteson@cs.ox.ac.uk 
+
+% \title{\LARGE \bf
+% Rapidly Exploring Learning Trees
+% }
+\IEEEoverridecommandlockouts                              % This command is only needed if 
+                                                          % you want to use the \thanks command
+
+\overrideIEEEmargins  
+
+\title{\LARGE \bf
+Rapidly Exploring Learning Trees
 }
+
+
+\author{Kyriacos Shiarlis$^{1}$ Joao Messias$^{1}$ Shimon Whiteson$^{2}$% <-this % stops a space
+% \thanks{*This work was not supported by any organization}% <-this % stops a space
+\thanks{$^{1}$Instute of Informatics Amsterdam, The Netherlands
+         {\tt\small k.c.shiarlis,j.messias@uva.nl}}%
+\thanks{$^{2}$Department of Computer Science, University of Oxform,
+         Oxford, United Kingdom
+         {\tt\small shimon.whiteson@cs.ox.ac.uk}}%
+}
+
+
+
+% \author{Kyriacos Shiarlis \\
+% University of Amsterdam \\
+% k.c.shiarlis@uva.nl
+% \And 
+% Joao Messias \\
+% University of Amsterdam \\ 
+% jmessias@uva.nl 
+% \And
+% Shimon Whiteson \\
+% University of Oxford \\
+% shimon.whiteson@cs.ox.ac.uk 
+% }
 \newcommand{\jm}[1]{\textcolor{blue}{Joao: #1}}
 
 \newcommand{\sw}[1]{\textcolor{red}{SW: #1}}
