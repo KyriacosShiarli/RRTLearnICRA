@@ -424,17 +424,12 @@ We evaluate RLT$^*$ by comparing it to MMP, implemented using an A$^*$ planner, 
 	\subsection{Simulated Experiments}
 	We first consider randomly generated social environments in simulation, such as the one shown in Figure \ref{fig:exp_setting}. Every arrow in the figure represents a person's position and orientation. The robot is given the task of navigating from one point in the room to another. While it is aware of the orientation and position of different people, it has no idea on how to trade off reaching the target quickly with avoiding people and obstacles, i.e., the cost function is unknown. Instead, the robot is given a dataset of demonstrations $D$. Each demonstration $\zeta_i$ is a set of configurations $s = (x,y)$ representing positions of the robot in the configuration space and each demonstration takes place for a different random configuration of the social environment, i.e., the people are at different positions and orientations every time. The task is to use $D$ to extract a cost function that enables socially intelligent behaviour.
 
-	The features we use can be divided in three categories. The first category encodes proxemics to the people present in the scene, i.e., the social features. Within this category we consider two variations, shown in Figure \ref{fig:setting}, for reasons explained in the following section.
+	The features we use can be divided in three categories. The first category encodes proxemics to the people present in the scene, i.e., the social features. Within this category we consider two variations, for reasons explained in the following section.
 	\begin{itemize}
-		\item {\bf Social feature set 1 (S1)}: Three Gaussians of different means and diagonal covariances around each person. Figure \ref{fig:S1}.  \sw{Is the mean set to the person's location?  It's unclear what this feature represents.}
-		\item {\bf Social feature set 2 (S2)}: Three field-of-view features of different angles and distances from the person. Figure \ref{fig:S2}.
+		\item {\bf Social feature set 1 (S1)}: Three isotropic Gaussian functions with different means. Centered in front, behind and on the person.
+		\item {\bf Social feature set 2 (S2)}: Three field-of-view features. The features has a value of 1 if the robot is within a certain distance and angle from the person.
 	\end{itemize}
 	  The second category of features encodes the distance from the target location using linear, exponential and logarithmic functions. The third category encodes the obstacle cost using a stable function of the reciprocal of the distance from the nearest obstacle. Figure \ref{fig:cost_f} shows an example cost function over the whole configuration space for the configuration in Figure \ref{fig:exp_setting}. We use different functions for human and target proximity, to allow for more degrees of freedom when modelling the underlying cost function. Sufficient regularisation ensures that that the model does not overfit.
-
-
-
-
-
 
 	\begin{figure}[tbh]
 %	\hspace{-5cm}
@@ -447,13 +442,13 @@ We evaluate RLT$^*$ by comparing it to MMP, implemented using an A$^*$ planner, 
   \hspace{10mm}
   \begin{subfigure}[b]{0.35\columnwidth}
   \hspace{4mm}
-    \includegraphics[scale = 0.15]{images/cf_1.png}
+    \includegraphics[scale = 0.15]{images/cf.png}
     \caption{Cost function}
     \label{fig:cost_f}
   \end{subfigure} 
 
   %\vspace{-3mm}
-  \caption{(a) An instance of the randomised social navigation task. Arrows denote the position and orientation of people in the scene. The robot is on the lefthand side of the map and the green box in the bottom right denotes the goal location. \sw{I don't see the robot or the goal in the figure.} (b) The corresponding cost function. Red denotes \emph{low} cost, while purple denotes \emph{high} cost.}
+  \caption{(a) An instance of the randomised social navigation task. Arrows denote the position and orientation of people in the scene. The robot is represented by the box in magenta while the green box goal location. (b) The corresponding cost function. Red denotes \emph{low} cost, while purple denotes \emph{high} cost.}
 
     \vspace{-2mm}
 
@@ -462,38 +457,37 @@ We evaluate RLT$^*$ by comparing it to MMP, implemented using an A$^*$ planner, 
   \end{figure}
 
 
-	\begin{figure}[tbh]
-%	\hspace{-5cm}
-	\centering
-      \begin{subfigure}[b]{0.42\columnwidth}
-    \includegraphics[scale=0.2]{images/person_feat2.png}
-    \caption{Social feature set S1.}
-    \label{fig:S1}
-  \end{subfigure}
-  \hspace{10mm}
-  \begin{subfigure}[b]{0.42\columnwidth}
-  \hspace{4mm}
-    \includegraphics[scale=0.2]{images/person_feat1.png}
-    \caption{Social feature set S2}
-    \label{fig:S2}
-  \end{subfigure} 
-  %\vspace{-3mm}
-  \caption{Cost functions resulting from linear combinations of the social featuresets. Figure \ref{fig:S1} demonstrates featureset 1. It consists of three isotropic Gaussian functions centered in front in the center and behind the person. Figure \ref{fig:S2} shows the field-of-view features of featureset S2. \sw{I have no idea what these plots are showing.} \ks{Now?}}
-    \vspace{-2mm}
-  %\vspace{-3mm}
-  \label{fig:setting}
-  \end{figure}
+% 	\begin{figure}[tbh]
+% %	\hspace{-5cm}
+% 	\centering
+%       \begin{subfigure}[b]{0.42\columnwidth}
+%     \includegraphics[scale=0.2]{images/person_feat2.png}
+%     \caption{Social feature set S1.}
+%     \label{fig:S1}
+%   \end{subfigure}
+%   \hspace{10mm}
+%   \begin{subfigure}[b]{0.42\columnwidth}
+%   \hspace{4mm}
+%     \includegraphics[scale=0.2]{images/person_feat1.png}
+%     \caption{Social feature set S2}
+%     \label{fig:S2}
+%   \end{subfigure} 
+%   %\vspace{-3mm}
+%   \caption{Cost functions resulting from linear combinations of the social featuresets. Figure \ref{fig:S1} demonstrates featureset 1. It consists of three isotropic Gaussian functions centered in front in the center and behind the person. Figure \ref{fig:S2} shows the field-of-view features of featureset S2. \sw{I have no idea what these plots are showing.} \ks{Now?}}
+%     \vspace{-2mm}
+%   %\vspace{-3mm}
+%   \label{fig:setting}
+%   \end{figure}
 
 
 	\subsubsection{Evaluation}
 
 	To evaluate our algorithms, we generate a dataset $D$ by planning near-optimal paths from initial configurations $s_o$ to goal configurations $s_g$ under a ground-truth cost function $c_{gt}()$ derived from ground-truth weights $\mathbf{w}_{gt}$ and features $\mathbf{F}_{gt}$. A fully optimal path can only be derived asymptotically in terms of either time  for RRT$^*$, or resolution for A$^*$. In practice, however, we found that planning for 100 seconds using  RRT$^*$  achieves a path that is nearly optimal; running longer leads to negligible changes in path cost. 
-
-	The resulting ground truth dataset enables a quantatitive empirical evaluation, which is otherwise problematic in IRL \ks{cite me?} \sw{sure, and others}. For each path $\zeta$ generated by the learning algorithm, we know its cost under the ground-truth cost function and features is simply  $\mathbf{w}_{gt}^T\mathbf{F}_{gt}(\zeta)$. Furthermore, we can compute the cost difference between the learned path and the demonstrated path path with respect to ground truth:
+	The resulting ground truth dataset enables a quantatitive empirical evaluation, which is otherwise problematic in IRL \cite{shiarlis2016inverse,vasquez2014inverse}. For each path $\zeta$ generated by the learning algorithm, we know its cost under the ground-truth cost function and features is simply  $\mathbf{w}_{gt}^T\mathbf{F}_{gt}(\zeta)$. Furthermore, we can compute the cost difference between the learned path and the demonstrated path with respect to ground truth:
 	\begin{equation}
 		Q(\zeta,\zeta_i,\mathbf{w}_{gt}) = \mathbf{w}_{gt}^T(\mathbf{F}_{gt}(\zeta)-\mathbf{F}_{gt}(\zeta_i)), \label{eq:obj_eval}
 	\end{equation}
-which is our primary performance metric.  Note that, if the demonstration path $\zeta_i$ is optimal under $\mathbf{w}_{gt}$, then $Q(\zeta,\zeta_i,\mathbf{w}_{gt}) \geq 0$. For our simulated experiments, we consider two learning scenarios.
+which is our primary performance metric.  Note that, if the demonstration path $\zeta_i$ is optimal under $\mathbf{w}_{gt}$, then $Q(\zeta,\zeta_i,\mathbf{w}_{gt}) \geq 0$. For our holonomic simulated experiments, we consider two learning scenarios.
 \begin{enumerate}
 	\item \textbf{Unknown weights}: only $\mathbf{w}_{gt}$ is unknown. The demonstrations and the learning algorithm share social feature set S1.
 	\item \textbf{Unknown weights and features}: $\mathbf{w}_{gt}$ and $\mathbf{F}_{gt}$  are unknown. S2 is used to generate the demonstrations and S1 is used for learning.
@@ -512,7 +506,7 @@ We also document the total learning time for K iterations for the algorithms und
 	
 	 Figures \ref{fig:res_sim1} and \ref{fig:res_sim2} show the results for the two scenarios described earlier. MMP\_X (green) refers to MMP with X meters of grid resolution while  RLT\_X (red) and RLT-NC\_X (blue) refer to RLT and RLT without caching, respectively, with X seconds of planning.  Since lower is better for both cost difference and learning time, the closer a point is to the bottom left corner, the better.
 	 
-	 RLT$^*$ (red) dominates a large portion of the Pareto front, demonstrating good performance and generalisation in reasonable time. Furthermore, caching not only speeds learning in RLT$^*$, it also modestly reduces cost differences. This suggests that the caching scheme introduces extra robustness and generalisation capabilities within the algorithm. As mentioned in Section \ref{subsec:cached} we believe that the caching scheme provides makes the gradients smoother and more consistent. To show this we plot the inner product between successive gradients during learning in Figure cite. We can see that the gradients of RLT$^*$ are clearly smoother, which further reinforces our claim. \sw{This needs to be tied back to the consistency/momentum argument of Section 4.2.} The performance of RLT$^*$ and RLT-NC significantly degrades at very low planning times (2 seconds) because AMMP cannot sample good enough paths to compute a useful gradient. Finally, MMP's learning time scales exponentially with the size of the grid. This, however, is not solely due to the graph getting larger but also because A$^*$ search scales poorly with the complexity of the cost function itself. Since it relies on an admissible heuristic that for complex cost functions is no longer tight, A$^*$ must expand many more states. By contrast, the sample-based RLT$^*$ is less susceptible to such problems.
+	 RLT$^*$ (red) dominates a large portion of the Pareto front, demonstrating good performance and generalisation in reasonable time. Furthermore, caching not only speeds learning in RLT$^*$, it also modestly reduces cost differences. This suggests that the caching scheme introduces extra robustness and generalisation capabilities within the algorithm. As mentioned in Section \ref{subsec:cached} we believe that the caching scheme makes the gradients smoother and more consistent and thus serves as a type of momentum. To show this we plot the inner product between successive gradients during learning in Figure cite. We can see that the gradients of RLT$^*$ are clearly smoother, which further reinforces our claim. The performance of RLT$^*$ and RLT-NC significantly degrades at very low planning times (2 seconds) because AMMP cannot sample good enough paths to compute a useful gradient. Finally, MMP's learning time scales exponentially with the size of the grid. This, however, is not solely due to the graph getting larger but also because A$^*$ search scales poorly with the complexity of the cost function itself. Since it relies on an admissible heuristic that for complex cost functions is no longer tight, A$^*$ must expand many more states. By contrast, the sample-based RLT$^*$ is less susceptible to such problems.
 
 	\begin{figure}[tbh]
 	\centering
@@ -536,15 +530,7 @@ We also document the total learning time for K iterations for the algorithms und
   \label{fig:results_sim}
   \end{figure}
 
-	\begin{figure}[tbh]
-%	\hspace{-5cm}
-	\centering
-    \includegraphics[scale=0.15]{images/cf_w_plans.png}
-    \caption{Qualitative evaluation of simulated results. The colormap denotes the learned cost function. Red denotes \emph(low) cost and green \emph{high} cost. The learned path (red) is very similar to the demonstrated path (black) with a clear improvement over the path before learning (purple). This example was taken from the validation set, and thus not a case of overfitting. \sw{Where is this figure discussed?} }
-    \vspace{-2mm}
-  %\vspace{-3mm}
-  \label{fig:results_qual}
-  \end{figure}
+
 
  	\begin{figure}[tbh]
 %	\hspace{-5cm}
@@ -556,8 +542,19 @@ We also document the total learning time for K iterations for the algorithms und
   \label{fig:in_prod_grad}
   \end{figure}
 
+
+	\begin{figure}[tbh]
+%	\hspace{-5cm}
+	\centering
+    \includegraphics[scale=0.15]{images/cf_w_plans.png}
+    \caption{Qualitative evaluation of simulated results. The colormap denotes the learned cost function. Red denotes \emph(low) cost and green \emph{high} cost. The learned path (red) is very similar to the demonstrated path (black) with a clear improvement over the path before learning (purple).}
+    \vspace{-2mm}
+  %\vspace{-3mm}
+  \label{fig:results_qual}
+  \end{figure}
+
   \subsubsection{Non-Holonomic Robot Results}
-  As mentioned earlier, a potential advantage of RLT$^*$ is that it can efficiently handle learning in the case of motion constraints. In this paper we consider a robot planning in a three dimentional space, $(x,y,\theta)$, representing the position and orientation of the robot. The robot's motion is further subject to the following kinodynamic constraints:
+  As mentioned earlier, a potential advantage of RLT$^*$ is that it can efficiently handle learning in the case of motion constraints. In this paper we consider a robot planning in a three dimentional space, $(x,y,\theta)$, representing the position and orientation of the robot. The robot's motion is further subject to the following motion constraints:
 %
   \begin{align}
   	&\dot{x} = v\times\cos(\theta),\\
@@ -565,27 +562,26 @@ We also document the total learning time for K iterations for the algorithms und
   	&\dot{\theta} = \omega,
   \end{align}
   where $v,\omega$ are the linear and angular velocities respectively.
-  To meet these constraints, we use the POSQ $\texttt{Steer}$ function \cite{palmieri2014novel}.  Since this approach gives a local closed-loop policy between two vertices of the tree, it is  more robust to noise and uncertainty in the motion. Furthermore, it has been shown to produce smooth paths between feasible configurations \cite{palmieri2014novel}. Evaluation is done in much the same way as in the previous section, except that we compare RLT$^*$ only to RLT-NC and not MMP, as the latter cannot handle kinodynamic constraints. \sw{Earlier we were calling these "obstacles and motion constraints."  It's important to be consistent throughout.}
+  To meet these constraints, we use the POSQ $\texttt{Steer}$ function \cite{palmieri2014novel}.  Since this approach gives a local closed-loop policy between two vertices of the tree, it is  more robust to noise and uncertainty in the motion. Furthermore, it has been shown to produce smooth paths between feasible configurations \cite{palmieri2014novel}. Evaluation is done in much the same way as in the previous section, except that we compare RLT$^*$ only to RLT-NC and not MMP, as the latter cannot handle motion constraints.
 RLT-NC was given 100 seconds to plan, in which case about 3000 configurations were sampled, and RLT$^*$'s cache was set to this size. 
 
-Figure \ref{fig:res_kino1} shows that RLT$^*$ is an order of magnitude faster than RLT-NC, while achieving a lower cost difference. The kinematic constraints contribute to this speedup since they make the \texttt{Steer} and \texttt{Safe} procedures, which are cached, more expensive. Figure \ref{fig:res_kino2} shows that RLT$^*$ results in more stable learning. \sw{What does the learning curve add exactly?}
-
+Figure \ref{fig:results_kino} shows that RLT$^*$ is an order of magnitude faster than RLT-NC, while achieving a lower cost difference. The kinematic constraints contribute to this speedup since they make the \texttt{Steer} and \texttt{Safe} procedures, which are cached, more expensive. As in the holonomic case, RLT$^*$ resulted in smoother learning supporting the results of Figure \ref{fig:in_prod_grad}. Figure \ref{fig:results_qual} shows an instance of the types of paths generated by our method when compared to ground truth. The specific example was drawn from the validation set and thus not a case of overfitting.
   	\begin{figure}[tbh]
 	\centering
 	\captionsetup[subfigure]{justification=centering}
 	\hspace{-1cm}
-      \begin{subfigure}[b]{0.42\columnwidth}
+      % \begin{subfigure}[b]{0.42\columnwidth}
     \includegraphics[scale=0.25]{images/pareto_front_kino.png}
-    \caption{Learning time vs.\ cost difference.}
-    \label{fig:res_kino1}
-  \end{subfigure}
-     	\hspace{10mm}
-  \begin{subfigure}[b]{0.42\columnwidth}
+    % \caption{Learning time vs.\ cost difference.}
+    % \label{fig:res_kino1}
+  % \end{subfigure}
+     	% \hspace{10mm}
+  % \begin{subfigure}[b]{0.42\columnwidth}
 
-    \includegraphics[scale=0.25]{images/cost_diff_val_kino.png}
-    \caption{Learning curve}
-    \label{fig:res_kino2}
-  \end{subfigure} 
+  %   \includegraphics[scale=0.25]{images/cost_diff_val_kino.png}
+  %   \caption{Learning curve}
+  %   \label{fig:res_kino2}
+  % \end{subfigure} 
     \caption{Non-holonomic robot results.}
     \vspace{-2mm}
   %\vspace{-3mm}
@@ -600,7 +596,7 @@ Figure \ref{fig:res_kino1} shows that RLT$^*$ is an order of magnitude faster th
 
 	To collect data for learning and validation, we use an off-the-shelf telepresence system augmented with several sensors that allow localisation and perception \cite{shiarlis2015teresa}. We use an Optitrack motion-capture system to accurately collect ground truth data of both people robot positions. RLT$^*$ learns a cost function from this data using the social feature set S1 and the rest of the features described earlier.
 
-Since quantitative evaluation is difficult using real data, as no ground truth is available, we perform a qualitative evaluation instead. Figure \ref{fig:results_real} shows some representative cases that arose during learning. Figures \ref{fig:res_real1} and \ref{fig:res_real2}  show cases where RLT$^*$ produced paths (red) that are very similar to the demonstrated ones (black). Figures \ref{fig:res_real3} and \ref{fig:res_real4} show instances where  the learned paths are reasonable even though they are not similar to the demonstrated paths.
+Since quantitative evaluation is difficult using real data, as no ground truth is available, we perform a qualitative evaluation instead. Figure \ref{fig:results_real} shows some representative cases that arose during learning. Figure \ref{fig:res_real1} shows a case where RLT$^*$ produced paths (red) that are very similar to the demonstrated ones (black). Figure \ref{fig:res_real4} shows an instance instances where  the learned paths are reasonable even though they are not similar to the demonstrated paths.
 
 			\begin{figure}[tbh]
 %	\hspace{-5cm}
@@ -613,31 +609,17 @@ Since quantitative evaluation is difficult using real data, as no ground truth i
   \hspace{10mm}
   \begin{subfigure}[b]{0.42\columnwidth}
   \hspace{4mm}
-    \includegraphics[scale=0.15]{images/real_good4.png}
-    \caption{}
-    \label{fig:res_real2}
-  \end{subfigure} 
-  \\
-        \begin{subfigure}[b]{0.42\columnwidth}
-    \includegraphics[scale=0.15]{images/real_reasonable2.png}
-    \caption{}
-    \label{fig:res_real3}
-  \end{subfigure}
-  \hspace{10mm}
-  \begin{subfigure}[b]{0.42\columnwidth}
-  \hspace{4mm}
     \includegraphics[scale=0.15]{images/real_reasonable3.png}
     \caption{}
     \label{fig:res_real4}
   \end{subfigure} 
-    \caption{Real demonstrated paths (black), learned paths (red), and shortest paths (purple). In (a,b), the learned path is similar to the demonstrated path; in (c,d) it is different but reasonable.}
+    \caption{Real demonstrated paths (black), learned paths (red), and shortest paths (purple). In (a), the learned path is similar to the demonstrated path; in (b) it is different but reasonable.}
     \vspace{-2mm}
   %\vspace{-3mm}
   \label{fig:results_real}
   \end{figure}
 
-	Finally, we deployed the learned cost function, shown in Figure \ref{fig:real_cf}, on a real telepresence robot. A video demonstrating this deployment can be found online \footnote{ADD LINK TO VIDEO}. \sw{Qualitatively describe the deployment.  Was it a success?}
-
+	Finally, we succesfully deployed the learned cost function, shown in Figure \ref{fig:real_cf}, on a real telepresence robot. A video demonstrating this deployment can be found in the supplementary material. Even though our planner outputs a full policy in terms of angular and linear velocities, to follow the prescribed path we used an elastic bands local planner in order to deal with dynamic changes in the environment.\ks{should I say this?} 
 
 	\begin{figure}[tbh]
 %	\hspace{-5cm}
