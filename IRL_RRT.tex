@@ -240,7 +240,7 @@ The inverse problem can therefore be seen as an iterative procedure that first s
 
 	\subsection{Approximate Maximum Margin Planning \label{subsec:ammp}}
 
-Section \ref{subsec:inverse_problem} shows how the multiple constraints of \eqref{eq:const1} can be reduced to the single constraint of \eqref{eq:const} for each demonstration. However, this reduction requires an optimal planner to perform the minimisation in \eqref{eq:const1}, which is impractical in many robot applications. Suppose instead that, as in RRT$^*$, we have a mechanism for sampling different paths from $Z_{o,g}$ along with their respective costs and that, for a given finite time budget $T$, this path sampler samples a subset $\tilde{Z}_{o,g} \subset Z_{o,g}$,  Then we can modify \eqref{eq:const} to demand that our cost function satisfies,
+Section \ref{subsec:inverse_problem} shows how the multiple constraints of \eqref{eq:const1} can be reduced to the single constraint of \eqref{eq:const} for each demonstration. However, this reduction requires an optimal planner to perform the minimisation in \eqref{eq:const1}, which is impractical in many robot applications. Suppose instead that, as in RRT$^*$, we have a mechanism for sampling different paths from $Z_{o,g}$ along with their respective costs and that, for a given finite time budget $T$, this path sampler samples a subset $\tilde{Z}_{o,g} \subset Z_{o,g}$,  Then, we can modify \eqref{eq:const} to demand that our cost function satisfies,
 \begin{equation}
 	C(\zeta^i_{o_i,g_i}) \leq \min_{\zeta_{o_i,g_i} \in \tilde{Z}_{o_i,g_i}} C(\zeta) \quad \forall i. \label{eq:const_rrt}
 \end{equation}
