@@ -147,11 +147,9 @@ As there could be several paths to the goal, planners often employ a \emph{cost 
 \end{equation}
 This cost functional is similar to the one used in optimal control and analogous to the return used in reinforcement learning. Given the cost functional, the path planner seeks an optimal path $\zeta^*$, which satisfies,
 \begin{equation}
- 	\zeta^*_{o,g} = \argmin_{\zeta_{o,g} \in Z_{o,g}} C(\zeta). \label{eq:back_plan}
+ 	\zeta^*_{o,g} = \argmin_{\zeta_{o,g} \in Z_{o,g}} C(\zeta), \label{eq:back_plan}
 \end{equation}
-$Z_{o,g}$ is the set of possible paths such that $s_1 = o, s_{l_\zeta} = g$.
-
-Many path planning algorithms discretise $\mathcal{S}$ and use graph search algorithms like A$^*$ to find the optimal path. Under mild assumptions, these approaches are guaranteed to find the best path on the graph, therefore solving \eqref{eq:back_plan} for a subset $\tilde{Z}_{o,g} \subset Z_{o,g}$, whose size depends on the discretisation. However, such methods scale poorly in the size of $\mathcal{S}$. Furthermore, such algorithms ignore motion constraints as they assume all nodes in the graph can be reached by its neighbours in exactly the same way. This assumption does not hold, e.g., for non-holonomic robots, where the ortientation at each node places constraints on how it can be reached. In this new constrained space it is less straightforward to define actions, neighbouring nodes as well as an admissible heuristic without which the algorithm is no longer optimal.
+where $Z_{o,g}$ is the set of possible paths such that $s_1 = o, s_{l_\zeta} = g$. Many path planning algorithms discretise $\mathcal{S}$ and use graph search algorithms like A$^*$ to find the optimal path. Under mild assumptions, these approaches are guaranteed to find the best path on the graph, therefore solving \eqref{eq:back_plan} for a subset $\tilde{Z}_{o,g} \subset Z_{o,g}$, whose size depends on the discretisation. However, such methods scale poorly in the size of $\mathcal{S}$. Furthermore, such algorithms ignore motion constraints as they assume all nodes in the graph can be reached by their neighbours in exactly the same way. This assumption does not hold, e.g., for non-holonomic robots, where the ortientation at each node places constraints on how it can be reached. In this constrained space, it is less straightforward to define actions, neighbouring nodes, or an admissible heuristic, which is necessary for optimality.
 
 These drawbacks motivate \emph{sample-based} path planning algorithms such as RRT$^*$  \cite{karaman2011sampling}. Instead of building a graph and then searching it, RRT$^*$ builds a tree on the fly and keeps track of the current best path. The algorithm consists of two interleaved steps. 
 
