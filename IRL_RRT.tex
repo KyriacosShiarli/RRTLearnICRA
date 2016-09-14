@@ -121,7 +121,8 @@ Another approach is to use hybrid planners. Inverse Optimal Heuristic Control \c
 
 Another recent method is Adaptive State Graphs \cite{okallearning}, which builds a state-action controller graph before doing any learning. This controller graph is akin to \emph{options} in semi-Markov decision processes, and allows for a more flexible representation of the state-action space. However, the controller used to learn the underlying cost function is different from the one used to execute the robot's behaviour. This can have adverse effects since IRL  assumes that the demonstration paths came from the same planner used during learning.  Instead of building a controller graph first and then using a different controller to optimise trajectories, RLT$^*$ builds a controller tree on the fly and uses the same planner for learning and execution.
 
-All of the above methods require a model of the dynamics of the system. By contrast, model-free IRL uses importance sampling to deal with high-dimensional state-action spaces \sw{I still don't understand the connection between IS and high-dimensionality.} with unknown dynamics \cite{boularias2011relative,kalakrishnan2013learning}. Instead of performing a full planning procedure at each iteration, model free IRL samples trajectories, usually starting from the initial conditions observed in the data. The probability of these trajectories is weighted according to the current cost function, which is then updated to make trajectories closer to the data more likely. A big challenge is to find an appropriate importance distribution at each iteration. \cite{finn2016guided} considers guiding the importance distribution by simultaneously learning a good policy under the current cost function and using it as an adaptive importance sampler. However, since it uses a modified version of Linear Quadratic Regulator control the derived policies are only locally optimal and can produce highly suboptimal paths or even fail in the presence of obstacles. By contrast, RRTs cope naturally with obstacles, as long as they are static and mapped, and is also asymptotically optimal.
+All of the above methods require a model of the dynamics of the system. Another paradigm, that of model-free IRL, avoids the need to explicitly plan, employing sampling instead. As a result it tends to scale better to high-dimensional state-action spaces and does not require \sw{I still don't understand the connection between IS and high-dimensionality.} a model of the system dynamics. \cite{boularias2011relative,kalakrishnan2013learning}.% Instead of performing a full planning procedure at each iteration, 
+Model free IRL samples trajectories, usually starting from the initial conditions observed in the data. The probability of these trajectories is weighted according to the current cost function, which is then updated to make trajectories closer to the data more likely. A big challenge is to find an appropriate importance distribution at each iteration. \cite{finn2016guided} considers guiding the importance distribution by simultaneously learning a good policy under the current cost function and using it as an adaptive importance sampler. However, since it uses a modified version of Linear Quadratic Regulator control the derived policies are only locally optimal and can produce highly suboptimal paths or even fail in the presence of obstacles. By contrast, RRTs cope naturally with obstacles, as long as they are static and mapped, and is also asymptotically optimal.
 
 % Because of the need to model the environment as an MDP, researchers usually discretise the state-action space. This introduces several key limitations. First, the size of the state-action space encountered in robotics is often prohibitive for such models. Second, the specific not all physical aspects of the robot can be easily expressed by such representations, introducing non-Markovian dynamics. 
 
@@ -442,7 +443,8 @@ We evaluate RLT$^*$ by comparing it to MMP, implemented using an A$^*$ planner, 
 		\item {\bf Social feature set 1 (S1)}: Three isotropic Gaussian functions with different means, centred in front, behind, and on the person.
 		\item {\bf Social feature set 2 (S2)}: Three field-of-view features. The features have a value of 1 if the robot is within a certain distance and angle from the person.
 	\end{itemize}
-	  The second category of features encodes the distance from the target location using linear, exponential, and logarithmic functions. The third category encodes the obstacle cost using a stable function of the reciprocal of the distance from the nearest obstacle. Figure \ref{fig:cost_f} shows an example cost function over the whole configuration space for the configuration in Figure \ref{fig:exp_setting}. We use different functions for human and target proximity, to allow for more degrees of freedom when modelling the underlying cost function. Sufficient regularisation ensures that that the model does not overfit.
+	  The second category of features encodes the distance from the target location using linear, exponential, and logarithmic functions. The third category encodes the obstacle cost using a stable function of the reciprocal of the distance from the nearest obstacle. Figure \ref{fig:cost_f} shows an example cost function over the whole configuration space for the configuration in Figure \ref{fig:exp_setting}. We use different functions for human and target proximity, to allow for more degrees of freedom when modelling the underlying cost function. Sufficient regularisation ensures that that the model does not overfit.
+
 
 
 % 	\begin{figure}[tbh]
@@ -492,7 +494,7 @@ We also document the total learning time for K iterations for the algorithms und
 	
 	As mentioned earlier, planning time and grid resolution affect the performance of RRT$^*$ and $A^*$, respectively. To make a fair comparison, we vary these two quantities for each algorithm and plot cost difference against learning time at each setting.  We can then identify which algorithms at which settings comprise the Pareto front, i.e., are undominated with respect to cost difference and learning time.
 	
-	 Figures \ref{fig:res_sim1} and \ref{fig:res_sim2} show the results for the two scenarios described earlier. MMP\_X (green) refers to MMP with X meters of grid resolution while  RLT\_X (red) and RLT$^*$-NC\_X (blue) refer to RLT and RLT without caching, respectively, with X seconds of planning.  Since lower is better for both cost difference and learning time, the closer a point is to the bottom left corner, the better.
+	 Figures \ref{fig:res_sim1} and \ref{fig:res_sim2} show the results for the two scenarios described earlier. MMP\_X (green) refers to MMP with X meters of grid resolution while  RLT\_X (red) and RLT$^*$-NC\_X (blue) refer to RLT and RLT without caching, respectively, with X seconds of planning. The shading represents an interpolation of the performance between settings for each method. In this way an area of single colour illustrates hypothesized domination of that method over another, given the same amount of time. Since lower is better for both cost difference and learning time, the closer a point is to the bottom left corner, the better.
 
 	\begin{figure}[tbh]
 	\centering
@@ -516,7 +518,7 @@ We also document the total learning time for K iterations for the algorithms und
   \label{fig:results_sim}
   \end{figure}
 
- RLT$^*$ (red) comprises a large majority of the Pareto front, demonstrating good performance and generalisation in reasonable time. \sw{Explain the shading in the figure and what the implications of it are.}  However, the performance of RLT$^*$ and RLT$^*$-NC significantly degrades at very low planning times (2 seconds) because AMMP cannot sample good enough paths to compute a useful gradient.
+ RLT$^*$ (red) comprises a large majority of the Pareto front, demonstrating good performance and generalisation in reasonable time.  However, the performance of RLT$^*$ and RLT$^*$-NC significantly degrades at very low planning times (2 seconds) because AMMP cannot sample good enough paths to compute a useful gradient.
  
  Note that caching not only speeds learning in RLT$^*$, it also modestly reduces cost differences. This suggests that the caching scheme introduces extra robustness and generalisation capabilities within the algorithm.  As mentioned in Section \ref{subsec:cached}, we hypothesise that the caching scheme improves learning by making the gradients smoother and more consistent, as with momentum. To confirm this, we plot the inner product between successive gradients during learning in Figure \ref{fig:in_prod_grad}. The plot confirms that subsequent gradients in RLT$^*$ are more similar.
  
@@ -525,13 +527,14 @@ We also document the total learning time for K iterations for the algorithms und
  	\begin{figure}[tbh]
 %	\hspace{-5cm}
 	\centering
-    \includegraphics[scale=0.23]{images/momentum.png}
+    \includegraphics[scale=0.21]{images/momentum.png}
     \caption{Inner product of succcessive gradients during learning. The smoother curve for RLT$^*$ suggests that fixing the sampled points during learning makes the gradients more consistent. }
     \vspace{-2mm}
   %\vspace{-3mm}
   \label{fig:in_prod_grad}
   \end{figure}
-
+
+
   \subsubsection{Non-Holonomic Robot Results}
   As mentioned earlier, a potential advantage of RLT$^*$ is that it can efficiently handle learning in the presence of motion constraints. In this section, we consider a robot planning in a three-dimensional space, $(x,y,\theta)$, representing the position and orientation of the robot. The robot's motion is further subject to the following motion constraints:
 %
@@ -541,7 +544,7 @@ We also document the total learning time for K iterations for the algorithms und
   	&\dot{\theta} = \omega,
   \end{align}
   where $v,\omega$ are the linear and angular velocities respectively.
-  To meet these constraints, we use the POSQ $\texttt{Steer}$ function \cite{palmieri2014novel}.  Since this approach gives a local closed-loop policy between two vertices of the tree, it is  more robust to noise and uncertainty in the motion \sw{than what?}. Furthermore, it has been shown to produce smooth paths between feasible configurations \cite{palmieri2014novel}. Evaluation is done in the same way as in the previous section, except that we compare RLT$^*$ only to RLT$^*$-NC and not MMP, as the latter cannot handle motion constraints.
+  To meet these constraints, we use the POSQ $\texttt{Steer}$ function \cite{palmieri2014novel}.  Since this approach gives a local closed-loop policy between two vertices of the tree, it is  more robust to noise and uncertainty in the motion than an open loop trajectory. Furthermore, it has been shown to produce smooth paths between feasible configurations \cite{palmieri2014novel}. Evaluation is done in the same way as in the previous section, except that we compare RLT$^*$ only to RLT$^*$-NC and not MMP, as the latter cannot handle motion constraints.
 RLT$^*$-NC was given 100 seconds to plan, in which case about 3000 configurations were sampled, and RLT$^*$'s cache was set to this size. 
 
 Figure \ref{fig:results_kino} shows that RLT$^*$ is an order of magnitude faster than RLT$^*$-NC, while achieving a lower cost difference. The kinematic constraints contribute to this speedup since they make the \texttt{Steer} and \texttt{Safe} procedures, which are cached, more expensive. As in the holonomic case, RLT$^*$ resulted in smoother learning, confirming the results of Figure \ref{fig:in_prod_grad}. 
@@ -551,7 +554,7 @@ Figure \ref{fig:results_kino} shows that RLT$^*$ is an order of magnitude faster
 	\captionsetup[subfigure]{justification=centering}
 	\hspace{-1cm}
       % \begin{subfigure}[b]{0.42\columnwidth}
-    \includegraphics[scale=0.25]{images/pareto_front_kino.png}
+    \includegraphics[scale=0.2]{images/pareto_front_kino.png}
     % \caption{Learning time vs.\ cost difference.}
     % \label{fig:res_kino1}
   % \end{subfigure}
@@ -568,12 +571,13 @@ Figure \ref{fig:results_kino} shows that RLT$^*$ is an order of magnitude faster
   \label{fig:results_kino}
   \end{figure}
 
-Figure \ref{fig:results_qual} shows an instance of the types of paths generated by our method when compared to ground truth. This specific example was drawn from the validation set and is thus not a case of overfitting.
+Figure \ref{fig:results_qual} shows an instance of the types of paths generated by our method when compared to ground truth. This specific example was drawn from the validation set and is thus not a case of overfitting.
+
 
 	\begin{figure}[tbh]
 %	\hspace{-5cm}
 	\centering
-    \includegraphics[scale=0.15]{images/kino_paths.png}
+    \includegraphics[scale=0.12]{images/kino_paths.png}
     \caption{Qualitative evaluation of simulated results. The colour map denotes the learned cost function. Red denotes \emph(low) cost and green \emph{high} cost. The learned path (red) is quite similar to the demonstrated path (black) with a clear improvement over the path before learning (purple).}
     \vspace{-2mm}
   %\vspace{-3mm}
@@ -593,14 +597,14 @@ Since quantitative evaluation is difficult using real data, as no ground truth i
 %	\hspace{-5cm}
 	\centering
       \begin{subfigure}[b]{0.42\columnwidth}
-    \includegraphics[scale=0.15]{images/real_good_new.png}
+    \includegraphics[scale=0.12]{images/real_good_new.png}
     \caption{}
     \label{fig:res_real1}
   \end{subfigure}
   \hspace{10mm}
   \begin{subfigure}[b]{0.42\columnwidth}
   \hspace{4mm}
-    \includegraphics[scale=0.15]{images/real_reasonable_new.png}
+    \includegraphics[scale=0.12]{images/real_reasonable_new.png}
     \caption{}
     \label{fig:res_real4}
   \end{subfigure} 
@@ -609,6 +613,31 @@ Since quantitative evaluation is difficult using real data, as no ground truth i
   %\vspace{-3mm}
   \label{fig:results_real}
   \end{figure}
+
+
+  	\begin{figure}[tbh]
+	\centering
+	\captionsetup[subfigure]{justification=centering}
+	\hspace{-1cm}
+      % \begin{subfigure}[b]{0.42\columnwidth}
+    \includegraphics[scale=0.13]{images/robot.jpg}
+    % \caption{Learning time vs.\ cost difference.}
+    % \label{fig:res_kino1}
+  % \end{subfigure}
+     	% \hspace{10mm}
+  % \begin{subfigure}[b]{0.42\columnwidth}
+
+  %   \includegraphics[scale=0.25]{images/cost_diff_val_kino.png}
+  %   \caption{Learning curve}
+  %   \label{fig:res_kino2}
+  % \end{subfigure} 
+    \caption{The telepresence robot used to deploy our cost function}
+    \vspace{-2mm}
+  %\vspace{-3mm}
+  \label{fig:results_kino}
+  \end{figure}
+
+
 
 	Finally, we succesfully deployed the learned cost function, also shown in Figure \ref{fig:results_real}, on a real telepresence robot. A video demonstrating this deployment can be found in the supplementary material. Even though our planner outputs a full policy in terms of angular and linear velocities, to follow the prescribed path we used an elastic bands local planner in order to deal with dynamic changes in the environment.%\ks{should I say this?} \jm{I think it's ok} 
 
@@ -706,8 +735,6 @@ Since quantitative evaluation is difficult using real data, as no ground truth i
 In this paper, we proposed Rapidly Exploring Learning Trees (RLT$^*$), which learns the cost functions of Rapidly Exploring Random Trees (RRT) from demonstration, thereby making inverse learning methods applicable to more complex tasks. Our approach extends the Maximum Margin Planning to work with RRT$^*$ cost functions. Furthermore, it uses a caching scheme that greatly reduces the computational cost and improves performance. Our results in simulated social navigation scenarios show that RLT$^*$ achieves better performance at lower computational cost, even when there is a discrepancy between the features used for demonstration and learning. Furthermore, our results show that RLT$^*$ can handle more complex configuration spaces with motion constraints. Finally, we used RLT$^*$ to learn a cost function using data from real demonstrations on a telepresence robot and successfully deployed that cost function back on the robot.
 
 In future work, we hope to extend RLT$^*$ to model how features evolve over time, in order to, e.g., consider people's movement during planning.  For complex social path planning applications, periodic replanning has been shown to help \cite{henry2010learning,vasquez2014inverse}. Replanning in RRT$^*$ is also possible \cite{otte2015rrtx} and could potentially be incorporated into RLT$*$.
-
-\sw{Make sure to use up any extra space, e.g., by making the figures larger.}
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
