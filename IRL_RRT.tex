@@ -3,7 +3,7 @@
 %        1         2         3         4         5         6         7         8
 
 \documentclass[letterpaper, 10 pt, conference]{ieeeconf} 
-\usepackage{times}
+%\usepackage{times}
 \usepackage{algorithmic}
 \usepackage{algorithm}
 \usepackage{subcaption}
@@ -21,7 +21,7 @@
 %\usepackage{amssymb}  % assumes amsmath package installed
 \usepackage{mathtools}
 \usepackage{amsmath}
-\usepackage{amsfonts}
+%\usepackage{amsfonts}
 \usepackage{color}
 \usepackage{amssymb}
 \DeclareMathOperator*{\argmin}{\arg\!\min} 
@@ -121,8 +121,8 @@ Another approach is to use hybrid planners. Inverse Optimal Heuristic Control \c
 
 Another recent method is Adaptive State Graphs \cite{okallearning}, which builds a state-action controller graph before doing any learning. This controller graph is akin to \emph{options} in semi-Markov decision processes, and allows for a more flexible representation of the state-action space. However, the controller used to learn the underlying cost function is different from the one used to execute the robot's behaviour. This can have adverse effects since IRL  assumes that the demonstration paths came from the same planner used during learning.  Instead of building a controller graph first and then using a different controller to optimise trajectories, RLT$^*$ builds a controller tree on the fly and uses the same planner for learning and execution.
 
-All of the above methods require a model of the dynamics of the system. Another paradigm, that of model-free IRL, avoids the need to explicitly plan, employing sampling instead. As a result it tends to scale better to high-dimensional state-action spaces and does not require a model of the system dynamics. \cite{boularias2011relative,kalakrishnan2013learning}.% Instead of performing a full planning procedure at each iteration, 
-Model free IRL samples trajectories, usually starting from the initial conditions observed in the data. The probability of these trajectories is weighted according to the current cost function, which is then updated to make trajectories closer to the data more likely. A big challenge is to find an appropriate importance distribution at each iteration. \cite{finn2016guided} considers guiding the importance distribution by simultaneously learning a good policy under the current cost function and using it as an adaptive importance sampler. However, since it uses a modified version of Linear Quadratic Regulator control the derived policies are only locally optimal and can produce highly suboptimal paths or even fail in the presence of obstacles. By contrast, RRTs cope naturally with obstacles, as long as they are static and mapped, and is also asymptotically optimal.
+All of the above methods require a model of the dynamics of the system. Another paradigm, that of model-free IRL, avoids the need to explicitly plan, employing sampling instead. As a result it tends to scale better to high-dimensional state-action spaces and does not require a model of the system dynamics, \cite{boularias2011relative,kalakrishnan2013learning}.
+ Model free IRL samples trajectories, usually starting from the initial conditions observed in the data. The probability of these trajectories is weighted according to the current cost function, which is then updated to make trajectories closer to the data more likely. A big challenge is to find an appropriate importance distribution at each iteration. \cite{finn2016guided} considers guiding the importance distribution by simultaneously learning a good policy under the current cost function and using it as an adaptive importance sampler. However, since it uses a modified version of Linear Quadratic Regulator control the derived policies are only locally optimal and can produce highly suboptimal paths or even fail in the presence of obstacles. By contrast, RRTs cope naturally with obstacles, as long as they are static and mapped, and is also asymptotically optimal.
 
 % Because of the need to model the environment as an MDP, researchers usually discretise the state-action space. This introduces several key limitations. First, the size of the state-action space encountered in robotics is often prohibitive for such models. Second, the specific not all physical aspects of the robot can be easily expressed by such representations, introducing non-Markovian dynamics. 
 
@@ -251,7 +251,7 @@ Section \ref{subsec:inverse_problem} shows how the multiple constraints of \eqre
 	\end{equation}
 This gives rise to an approach we call Approximate Maximum Margin Planning (AMMP). It is similar  to MMP with the crucial difference that the planning step is executed by a sample-based planner and not a deterministic one, like A$^*$. An important consequence is that $\tilde{Z}_{o_i,g_i}$ changes every time we invoke the sample-based planner. Thus, AMMP can be thought of as sampling the \emph{constraints} that we want our cost function to satisfy. The main advantage of AMMP is that it is not bound by the restrictive assumptions of  A$^*$, such as a discrete state-action space and no motion constraints. 
 
-However, an ineffective sampler could yield poor gradient estimates and thus poor solutions. In fact, Ratliff et al.\ \cite{ratliff2009chomp} argue that, for this reason, sample-based planners like RRT are not suited to learning cost functions from demonstration, as the paths sampled by RRT are heavily biased during the sampling process and can yield paths that are obstacle-free but highly suboptimal. However, asymptotically optimal sample-based planners like RRT$^*$ are better able to plan low-cost paths \cite{karaman2011sampling} and thus well suited for use within AMMP.
+However, an ineffective sampler could yield poor gradient estimates and thus poor solutions. In fact, Ratliff et al.\ \cite{ratliff2009chomp} argue that, for this reason, sample-based planners like RRT are not suited to learning cost functions from demonstration, as the paths sampled by RRT are heavily biased during the sampling process and thus highly suboptimal. However, asymptotically optimal sample-based planners like RRT$^*$ are better able to plan low-cost paths \cite{karaman2011sampling} and thus well suited for use within AMMP.
 
 \subsection{Rapidly Exploring Learning Trees \label{subsec:cached}}
 
@@ -634,10 +634,12 @@ Since quantitative evaluation is difficult using real data, as no ground truth i
     \vspace{-2mm}
   %\vspace{-3mm}
   \label{fig:results_real}
-  \end{figure}
+  \end{figure}
+
 
 	Finally, we successfully deployed the learned cost function, also shown in Figure \ref{fig:results_real}, on a real telepresence robot. A video demonstrating this deployment can be found in the supplementary material. Even though our planner outputs a full policy in terms of angular and linear velocities, to follow the prescribed path we used an elastic bands local planner in order to deal with dynamic changes in the environment.%\ks{should I say this?} \jm{I think it's ok} 
-
+
+
 
 \vspace{-1mm}
 \section{Conclusion \& Future Work}
